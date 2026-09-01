@@ -118,7 +118,7 @@
       <a href="#window">The window</a>
       <a href="#discovery">Discovery</a>
       <a href="#browsing">Browsing</a>
-      <a href="#colour">Colour</a>
+      <a href="#color">Color</a>
       <a href="#get">Get it</a>
     </nav>
 
@@ -152,7 +152,7 @@
     <p class="negations"><span>no webview</span><span>no Electron</span><span>no account</span><span>no telemetry</span></p>
     <div class="hero-actions">
       <a class="btn btn-primary btn-lg" href="#get">
-        <svg class="ico" aria-hidden="true"><use href="#i-save"/></svg>Download 0.1.0
+        <svg class="ico" aria-hidden="true"><use href="#i-save"/></svg>Download
       </a>
       <a class="btn btn-lg" href="https://github.com/jzbz/azzurro">
         <svg class="ico" aria-hidden="true"><use href="#i-link"/></svg>Read the source
@@ -513,12 +513,6 @@
         </div>
       </div>
 
-      <figcaption>
-        The window, rebuilt here in HTML from the geometry in
-        <code>ui/app-window.slint</code>. Pick a track, or open the player list
-        from the pill — the colour behind everything is taken from the sleeve.
-        The music is invented; the layout is not.
-      </figcaption>
     </figure>
   </div>
 </section>
@@ -577,13 +571,13 @@
   </div>
 </section>
 
-<!-- ----------------------------------------------------------- colour -->
-<section class="band band-sunken" id="colour">
+<!-- ------------------------------------------------------------ color -->
+<section class="band band-sunken" id="color">
   <div class="wrap wrap-narrow center">
     <p class="section-label">IT LOOKS LIKE THE MUSIC</p>
-    <h2>The room takes its colour from the sleeve.</h2>
+    <h2>The room takes its color from the sleeve.</h2>
     <p class="deck">
-      Every cover washes the window in its own colour — a red sleeve and a green
+      Every cover washes the window in its own color — a red sleeve and a green
       one feel different from across the room, before you are close enough to
       read anything. Light and dark themes, and it follows the one your desktop
       is already using.
@@ -622,7 +616,7 @@
 <section class="band band-sunken" id="get">
   <div class="wrap wrap-narrow center">
     <p class="section-label">GET IT</p>
-    <h2>Version 0.1.0.</h2>
+    <h2>Download.</h2>
     <p class="deck">
       Signed checksums for everything. The macOS build is notarised by Apple;
       the Windows build carries its own C runtime, so it needs nothing else.
@@ -639,11 +633,12 @@
 
     <p class="note">
       Linux, as a Flatpak bundle for x86_64 or aarch64. It carries its own
-      runtime, so it does not care what your distribution ships.
+      runtime, so it does not care what your distribution ships. Download the
+      bundle for your architecture, then:
     </p>
 
-    <div class="cmd" data-copy="flatpak install --user azzurro-v0.1.0-x86_64.flatpak">
-      <code>flatpak install --user azzurro-v0.1.0-x86_64.flatpak</code>
+    <div class="cmd" data-copy="flatpak install --user ./azzurro-*.flatpak">
+      <code>flatpak install --user ./azzurro-*.flatpak</code>
       <button class="copy" type="button" aria-label="Copy the Flatpak command">
         <svg class="ico" aria-hidden="true"><use href="#i-file"/></svg>
       </button>
@@ -670,7 +665,7 @@
     <p class="note">
       Every release ships a <code>SHA256SUMS</code> signed with
       <a href="https://jz.bz/">my key</a>. Check it before you trust any of the
-      above &mdash; it is the one artefact that survives a compromise of the
+      above &mdash; it is the one artifact that survives a compromise of the
       rest.
     </p>
 
@@ -733,17 +728,13 @@
       <a href="https://jz.bz/">jz<svg class="ico" aria-hidden="true"><use href="#i-link"/></svg></a>
     </nav>
 
-    <p class="colophon-legal">
-      MIT licensed. Icons are <a href="https://lucide.dev">Lucide</a>, ISC;
-      the page is set in Geist and Geo, both under the SIL Open Font License —
-      the same faces the application embeds.
-    </p>
+    <!-- Third-party licences, kept here rather than on the page: the icons are
+       Lucide (ISC) and the faces are Geist and Geo (SIL Open Font License).
+       The OFL text ships beside the fonts at assets/fonts/OFL.txt, and the
+       Lucide notice is in LICENSES.md beside this file. Azzurro itself is MIT.
 
-    <p class="colophon-legal">
-      Not affiliated with, endorsed by, or supported by Lenbrook Industries.
-      BluOS, Bluesound, NAD and PSB are their trademarks. Nothing in the
-      protocol notes came from Lenbrook, and none of their code is reproduced.
-    </p>
+       Not affiliated with or endorsed by Lenbrook Industries; BluOS,
+       Bluesound, NAD and PSB are their trademarks. -->
   </div>
 </footer>
 

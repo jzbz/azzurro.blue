@@ -1591,7 +1591,6 @@ p.dim { font-size: var(--t-body); }
 .colophon-links a { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
 .colophon-links a:hover { text-decoration: underline; }
 .colophon-links .ico { width: 13px; height: 13px; }
-.colophon-legal { max-width: 78ch; color: var(--faint); font-size: var(--t-body); line-height: 1.7; }
 
 /* -------------------------------------------------------------- narrow
  *
