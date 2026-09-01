@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  An invented sleeve — "Sightlines".
+
+  The page needs cover art it is free to publish, and the application's own
+  metainfo file makes the same point about screenshots: a controller
+  necessarily shows somebody's library, so what it shows here has to be made
+  rather than grabbed.
+
+  Each of these carries some near-black, some blown white and some flat grey on
+  purpose, because a sleeve that is nothing but saturated colour would let the
+  demo below discard nothing and teach nothing. Those are the three things
+  `dominant()` throws away.
+
+  One file serves two purposes. The window above draws it as a CSS background;
+  the colour demo loads this same file into a canvas and runs artwork.rs's
+  arithmetic over its pixels — so the swatch being measured is the sleeve being
+  shown, rather than a second drawing of it.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+  <rect width="200" height="200" fill="#0b0b0d"/>
+  <rect x="0" y="0" width="200" height="150" fill="#0d5b5e"/>
+  <g fill="none" stroke="#3fd0c9" stroke-width="8">
+    <circle cx="100" cy="150" r="40"/><circle cx="100" cy="150" r="76"/>
+    <circle cx="100" cy="150" r="112"/>
+  </g>
+  <rect x="0" y="0" width="200" height="34" fill="#8df3e6"/>
+  <rect x="0" y="34" width="200" height="5" fill="#0b0b0d"/>
+  <rect x="18" y="166" width="74" height="8" fill="#fcfcfa"/>
+  <rect x="18" y="182" width="42" height="8" fill="#9a9d9f"/>
+</svg>

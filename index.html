@@ -1,0 +1,766 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Azzurro — a controller for BluOS players</title>
+<meta name="description" content="A window that finds the BluOS players on your network and drives them — the queue, browsing, transport, grouping and alarms. Rust throughout, no webview.">
+<meta name="color-scheme" content="dark light">
+<link rel="icon" href="assets/images/icon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.png" sizes="32x32">
+<link rel="apple-touch-icon" href="assets/images/apple-touch-icon.png">
+<link rel="canonical" href="/">
+
+<meta name="theme-color" content="#0b0d10">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Azzurro">
+<meta property="og:title" content="Azzurro — a controller for BluOS players">
+<meta property="og:description" content="Bluesound, NAD and PSB, on Linux, macOS and Windows. Rust throughout, Slint for the GUI. No webview, no Electron, no Qt, no C++.">
+<!-- Absolute on purpose: link scrapers fetch this without page context, so a
+     relative path would resolve against nothing and the card would lose its
+     image. The only two places the domain is written down. -->
+<meta property="og:image" content="https://azzurro.blue/assets/images/og.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Azzurro — your players, in a window. A controller for BluOS players, shown as a window with a play queue, a now-playing sleeve and a transport bar.">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://azzurro.blue/assets/images/og.png">
+
+<link rel="preload" href="assets/fonts/geist-regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/geo.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/style.css">
+
+<!-- Stamp a stored choice of light before the first paint, so someone who has
+     chosen it does not get a flash of the dark default first. Only light is
+     ever stamped: dark is what the stylesheet already does, so a `dark` class
+     would be a class with no rule behind it. -->
+<script>
+(function () {
+    try {
+        if (localStorage.getItem("azzurro-theme") === "light") {
+            document.documentElement.classList.add("light");
+        }
+    } catch (e) {
+        /* No storage available. The stylesheet's dark default stands. */
+    }
+}());
+</script>
+</head>
+<body>
+
+<!-- Lucide icons, ISC licensed, vendored from the app's own ui/icons directory
+     so the site and the app draw from one set. 24x24 grid, 2px round-cap
+     stroke, currentColor throughout. The names are the app's own, out of
+     theme.slint: `next`/`previous` because that is what the buttons do,
+     `sleep` because `moon` describes the picture and not the function, and
+     `sounding` for the glyph that means "this is what is making the sound". -->
+<svg class="sprite" aria-hidden="true" focusable="false" width="0" height="0">
+  <defs>
+    <symbol viewBox="0 0 24 24" id="i-sounding"><path d="M2 10v3"/><path d="M6 6v11"/><path d="M10 3v18"/><path d="M14 8v7"/><path d="M18 5v13"/><path d="M22 10v3"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-play"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-pause"><rect x="14" y="3" width="5" height="18" rx="1"/><rect x="5" y="3" width="5" height="18" rx="1"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-next"><path d="M21 4v16"/><path d="M6.029 4.285A2 2 0 0 0 3 6v12a2 2 0 0 0 3.029 1.715l9.997-5.998a2 2 0 0 0 .003-3.432z"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-previous"><path d="M17.971 4.285A2 2 0 0 1 21 6v12a2 2 0 0 1-3.029 1.715l-9.997-5.998a2 2 0 0 1-.003-3.432z"/><path d="M3 20V4"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-shuffle"><path d="m18 14 4 4-4 4"/><path d="m18 2 4 4-4 4"/><path d="M2 18h1.973a4 4 0 0 0 3.3-1.7l5.454-8.6a4 4 0 0 1 3.3-1.7H22"/><path d="M2 6h1.972a4 4 0 0 1 3.6 2.2"/><path d="M22 18h-6.041a4 4 0 0 1-3.3-1.8l-.359-.45"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-repeat"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-volume"><path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/><path d="M16 9a5 5 0 0 1 0 6"/><path d="M19.364 18.364a9 9 0 0 0 0-12.728"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-queue"><path d="M16 5H3"/><path d="M11 12H3"/><path d="M11 19H3"/><path d="M21 16V5"/><circle cx="18" cy="16" r="3"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-browse"><rect width="8" height="18" x="3" y="3" rx="1"/> <path d="M7 3v18"/> <path d="M20.4 18.9c.2.5-.1 1.1-.6 1.3l-1.9.7c-.5.2-1.1-.1-1.3-.6L11.1 5.1c-.2-.5.1-1.1.6-1.3l1.9-.7c.5-.2 1.1.1 1.3.6Z"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-search"><path d="m21 21-4.34-4.34"/> <circle cx="11" cy="11" r="8"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-player"><rect width="16" height="20" x="4" y="2" rx="2"/><path d="M12 6h.01"/><circle cx="12" cy="14" r="4"/><path d="M12 14h.01"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-radio"><path d="M4 9V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4"/> <path d="M8 8v1"/> <path d="M12 8v1"/> <path d="M16 8v1"/> <rect width="20" height="12" x="2" y="9" rx="2"/> <circle cx="8" cy="15" r="2"/> <circle cx="16" cy="15" r="2"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-group"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" x2="16" y1="12" y2="12"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-grouped"><path d="M2 8V6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-6"/><path d="M2 12a9 9 0 0 1 8 8"/><path d="M2 16a5 5 0 0 1 4 4"/><line x1="2" x2="2.01" y1="20" y2="20"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-home"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/> <path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-settings"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/> <circle cx="12" cy="12" r="3"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-save"><path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-forward"><path d="m9 18 6-6-6-6"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-back"><path d="m15 18-6-6 6-6"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-collapse"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-expand"><path d="m18 15-6-6-6 6"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-album"><circle cx="12" cy="12" r="10"/><path d="M6 12c0-1.7.7-3.2 1.8-4.2"/><circle cx="12" cy="12" r="2"/><path d="M18 12c0 1.7-.7 3.2-1.8 4.2"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-favourite"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-recent"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-track"><path d="M9 18V5l12-2v13"/><path d="m9 9 12-2"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-menu"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-add"><path d="M5 12h14"/><path d="M12 5v14"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-less"><path d="M5 12h14"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-rescan"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-station"><path d="M4.9 16.1C1 12.2 1 5.8 4.9 1.9"/> <path d="M7.8 4.7a6.14 6.14 0 0 0-.8 7.5"/> <circle cx="12" cy="9" r="2"/> <path d="M16.2 4.8c2 2 2.26 5.11.8 7.47"/> <path d="M19.1 1.9a9.96 9.96 0 0 1 0 14.1"/> <path d="M9.5 18h5"/> <path d="m8 22 4-11 4 11"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-tv"><path d="m17 2-5 5-5-5"/> <rect width="20" height="15" x="2" y="7" rx="2"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-help"><circle cx="12" cy="12" r="10"/> <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/> <path d="M12 17h.01"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-link"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-file"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-preset"><path d="M17 3a2 2 0 0 1 2 2v15a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5a2 2 0 0 1 2-2z"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-bluetooth"><path d="m7 7 10 10-5 5V2l5 5L7 17"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-headphones"><path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-broadcast"><path d="M16.247 7.761a6 6 0 0 1 0 8.478"/> <path d="M19.075 4.933a10 10 0 0 1 0 14.134"/> <path d="M4.925 19.067a10 10 0 0 1 0-14.134"/> <path d="M7.753 16.239a6 6 0 0 1 0-8.478"/> <circle cx="12" cy="12" r="2"/></symbol>
+  </defs>
+</svg>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<p class="visually-hidden" id="copy-status" role="status"></p>
+
+<header class="site-head" id="siteHead">
+  <div class="head-inner">
+    <a class="brand" href="/" aria-label="Azzurro, home">
+      <svg class="ico ico-24" aria-hidden="true"><use href="#i-sounding"/></svg>
+      <span class="brand-word">AZZURRO</span>
+    </a>
+
+    <nav class="head-nav" aria-label="Sections">
+      <a href="#window">The window</a>
+      <a href="#discovery">Discovery</a>
+      <a href="#browsing">Browsing</a>
+      <a href="#colour">Colour</a>
+      <a href="#missing">Missing</a>
+      <a href="#get">Get it</a>
+    </nav>
+
+    <div class="head-actions">
+      <button class="btn btn-ghost btn-icon" id="theme-toggle" type="button" hidden
+              aria-pressed="false" aria-label="Dark theme">
+        <svg class="ico ico-sun" aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+        <svg class="ico ico-moon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+      </button>
+      <a class="btn" href="https://github.com/jzbz/azzurro">
+        GitHub<svg class="ico" aria-hidden="true"><use href="#i-link"/></svg>
+      </a>
+      <a class="btn btn-primary" href="#get">Get it</a>
+    </div>
+  </div>
+</header>
+
+<main id="main" tabindex="-1">
+
+<!-- ------------------------------------------------------------- hero -->
+<section class="hero" id="top">
+  <div class="wrap">
+    <p class="eyebrow">BluOS controller &middot; Bluesound, NAD and PSB &middot; Linux, macOS and Windows</p>
+    <h1 class="hero-h1">Your speakers,<br>in a window.</h1>
+    <p class="hero-deck">
+      A fast, native controller for BluOS players. Your library and every
+      service the player offers, cover art throughout, every room grouped how
+      you like &mdash; on all three desktops, from one small application.
+    </p>
+    <p class="hero-stack">Rust throughout &middot; Slint for the interface</p>
+    <p class="negations"><span>no webview</span><span>no Electron</span><span>no account</span><span>no telemetry</span></p>
+    <div class="hero-actions">
+      <a class="btn btn-primary btn-lg" href="#get">
+        <svg class="ico" aria-hidden="true"><use href="#i-save"/></svg>Download 0.1.0
+      </a>
+      <a class="btn btn-lg" href="https://github.com/jzbz/azzurro">
+        <svg class="ico" aria-hidden="true"><use href="#i-link"/></svg>Read the source
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ----------------------------------------------------------- window -->
+<!-- Rebuilt from the app's own geometry in ui/app-window.slint: a 268px
+     sidebar, a flexible centre, a 330px queue that slides to zero, and an 88px
+     transport bar across the bottom. Not a screenshot — a screenshot of a
+     controller shows somebody's library and the addresses on their network,
+     and the metainfo file says as much. The sleeves and the track names are
+     invented for this page. -->
+<section class="window-section" id="window">
+  <div class="wrap-wide">
+    <h2 class="visually-hidden">The window</h2>
+    <figure class="stage">
+      <div class="win has-tint" id="win" style="--tint: #bd682a">
+        <div class="win-wash" aria-hidden="true"></div>
+
+        <div class="win-bar">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="win-title">Azzurro</span>
+        </div>
+
+        <div class="win-body">
+
+          <!-- The sidebar is the player's own screen list, not a list of
+               players: /ui/Configuration says what is there. -->
+          <div class="rail">
+            <div class="rail-brand">
+              <svg class="ico ico-32" aria-hidden="true"><use href="#i-sounding"/></svg>
+              <span class="wordmark">AZZURRO</span>
+            </div>
+
+            <span class="rail-item is-active"><svg class="ico" aria-hidden="true"><use href="#i-home"/></svg><span>Home</span></span>
+            <span class="rail-item"><svg class="ico" aria-hidden="true"><use href="#i-favourite"/></svg><span>Favorites</span></span>
+            <span class="rail-item"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg><span>Search</span></span>
+            <span class="rail-item"><svg class="ico" aria-hidden="true"><use href="#i-preset"/></svg><span>Presets</span></span>
+
+            <p class="section-label rail-label">Inputs</p>
+            <span class="rail-item"><svg class="ico" aria-hidden="true"><use href="#i-bluetooth"/></svg><span>Bluetooth</span></span>
+            <span class="rail-item"><svg class="ico" aria-hidden="true"><use href="#i-tv"/></svg><span>HDMI ARC</span></span>
+
+            <p class="section-label rail-label">Music Services</p>
+            <span class="rail-item"><svg class="ico" aria-hidden="true"><use href="#i-browse"/></svg><span>Library</span></span>
+            <span class="rail-item"><svg class="ico" aria-hidden="true"><use href="#i-radio"/></svg><span>Radio</span></span>
+            <span class="rail-item"><svg class="ico" aria-hidden="true"><use href="#i-headphones"/></svg><span>Radio Paradise</span></span>
+            <span class="rail-item"><svg class="ico" aria-hidden="true"><use href="#i-broadcast"/></svg><span>TuneIn</span></span>
+
+            <div class="rail-spacer"></div>
+            <span class="rail-item"><svg class="ico" aria-hidden="true"><use href="#i-station"/></svg><span>My Stations</span></span>
+            <span class="rail-item"><svg class="ico" aria-hidden="true"><use href="#i-settings"/></svg><span>Settings</span></span>
+            <span class="rail-item"><svg class="ico" aria-hidden="true"><use href="#i-help"/></svg><span>Help</span></span>
+          </div>
+
+          <!-- The centre pane is whatever the player last described. Every
+               row and tile here came off the wire as XML. -->
+          <div class="content">
+            <div class="browse-head">
+              <span class="btn btn-ghost btn-icon is-quiet"><svg class="ico" aria-hidden="true"><use href="#i-back"/></svg></span>
+              <span class="browse-title">Halve Moon</span>
+              <span class="select"><svg class="ico" aria-hidden="true"><use href="#i-browse"/></svg>Local Music<svg class="ico" aria-hidden="true"><use href="#i-collapse"/></svg></span>
+            </div>
+
+            <div class="browse-search">
+              <span class="field">
+                <svg class="ico" aria-hidden="true"><use href="#i-search"/></svg>
+                <span class="placeholder">Search Local Music</span>
+              </span>
+            </div>
+
+            <div class="screen-head">
+              <span class="art art-160" data-sleeve="0" aria-hidden="true"></span>
+              <span class="screen-id">
+                <span class="screen-title">Lantern Season</span>
+                <span class="screen-sub">Halve Moon</span>
+                <span class="screen-detail">Album · 2024 · 9 tracks · 41:18</span>
+                <span class="pills">
+                  <span class="pill pill-primary"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg>Play all</span>
+                  <span class="pill"><svg class="ico" aria-hidden="true"><use href="#i-shuffle"/></svg>Shuffle</span>
+                </span>
+              </span>
+            </div>
+
+            <p class="section-label shelf-label">More from Halve Moon</p>
+            <div class="shelf" role="list" aria-label="More from Halve Moon (illustration)">
+              <span class="tile" role="listitem"><span class="art art-tile is-playing" data-sleeve="0" aria-hidden="true"></span><span class="tile-title">Lantern Season</span><span class="tile-sub">2024</span></span>
+              <span class="tile" role="listitem"><span class="art art-tile" data-sleeve="1" aria-hidden="true"></span><span class="tile-title">Blue Hour</span><span class="tile-sub">2022</span></span>
+              <span class="tile" role="listitem"><span class="art art-tile" data-sleeve="2" aria-hidden="true"></span><span class="tile-title">Paper Boats</span><span class="tile-sub">2021</span></span>
+              <span class="tile" role="listitem"><span class="art art-tile" data-sleeve="4" aria-hidden="true"></span><span class="tile-title">Sightlines</span><span class="tile-sub">2019</span></span>
+              <span class="tile" role="listitem"><span class="art art-tile" data-sleeve="5" aria-hidden="true"></span><span class="tile-title">Winter Almanac</span><span class="tile-sub">2017</span></span>
+            </div>
+
+            <p class="section-label shelf-label">Tracks</p>
+            <div class="rows">
+              <span class="brow"><b class="brow-n">1</b><span class="art art-36 art-glyph" aria-hidden="true"><svg class="ico" aria-hidden="true"><use href="#i-track"/></svg></span><span class="track-id"><span class="track-title">Long Way Round</span><span class="track-artist">Halve Moon</span></span><span class="badge">HR</span><svg class="ico brow-go" aria-hidden="true"><use href="#i-forward"/></svg></span>
+              <span class="brow is-playing"><b class="brow-n">2</b><span class="art art-36" data-sleeve="0" aria-hidden="true"></span><span class="track-id"><span class="track-title">Lantern Season</span><span class="track-artist">Halve Moon</span></span><span class="badge">HR</span><svg class="ico brow-go brow-sounding" aria-hidden="true"><use href="#i-sounding"/></svg></span>
+              <span class="brow"><b class="brow-n">3</b><span class="art art-36 art-glyph" aria-hidden="true"><svg class="ico" aria-hidden="true"><use href="#i-track"/></svg></span><span class="track-id"><span class="track-title">Harbour Lights</span><span class="track-artist">Halve Moon</span></span><span class="badge">CD</span><svg class="ico brow-go" aria-hidden="true"><use href="#i-forward"/></svg></span>
+              <span class="brow"><b class="brow-n">4</b><span class="art art-36 art-glyph" aria-hidden="true"><svg class="ico" aria-hidden="true"><use href="#i-track"/></svg></span><span class="track-id"><span class="track-title">Stray Current</span><span class="track-artist">Halve Moon</span></span><span class="badge">CD</span><svg class="ico brow-go" aria-hidden="true"><use href="#i-forward"/></svg></span>
+            </div>
+          </div>
+
+          <!-- The queue is a third column, not a tab. Its status line is in
+               the header, right-aligned, because the bottom of the pane
+               belongs to the player's own buttons. -->
+          <div class="queue">
+            <div class="queue-head">
+              <span class="queue-title">Play Queue</span>
+              <span class="queue-line">11 tracks · 51:34</span>
+            </div>
+
+            <ul class="tracks" id="tracks" role="listbox" aria-label="Play queue (illustration)">
+              <li class="queue-band" aria-hidden="true">CURRENTLY PLAYING</li>
+              <li class="track is-live" role="option" aria-selected="true" tabindex="0"
+                  data-index="0" data-sleeve="0" data-title="Lantern Season"
+                  data-artist="Halve Moon" data-album="Lantern Season"
+                  data-tint="#bd682a" data-length="3:58">
+                <span class="art art-36" data-sleeve="0" aria-hidden="true"></span>
+                <span class="track-id"><span class="track-title">Lantern Season</span><span class="track-artist">Halve Moon</span></span>
+                <span class="badge">HR</span>
+                <span class="track-menu"><svg class="ico" aria-hidden="true"><use href="#i-menu"/></svg></span>
+                <span class="track-time">3:58</span>
+              </li>
+              <li class="queue-band" aria-hidden="true">UP NEXT</li>
+              <li class="track" role="option" aria-selected="false" tabindex="-1"
+                  data-index="1" data-sleeve="1" data-title="Blue Hour"
+                  data-artist="The Ninth Wave" data-album="Blue Hour"
+                  data-tint="#2c69be" data-length="5:21">
+                <span class="art art-36" data-sleeve="1" aria-hidden="true"></span>
+                <span class="track-id"><span class="track-title">Blue Hour</span><span class="track-artist">The Ninth Wave</span></span>
+                <span class="badge">CD</span>
+                <span class="track-menu"><svg class="ico" aria-hidden="true"><use href="#i-menu"/></svg></span>
+                <span class="track-time">5:21</span>
+              </li>
+              <li class="track" role="option" aria-selected="false" tabindex="-1"
+                  data-index="2" data-sleeve="2" data-title="Paper Boats"
+                  data-artist="Ivo Anhalt" data-album="Paper Boats"
+                  data-tint="#3dbe82" data-length="4:30">
+                <span class="art art-36" data-sleeve="2" aria-hidden="true"></span>
+                <span class="track-id"><span class="track-title">Paper Boats</span><span class="track-artist">Ivo Anhalt</span></span>
+                <span class="badge">MQA</span>
+                <span class="track-menu"><svg class="ico" aria-hidden="true"><use href="#i-menu"/></svg></span>
+                <span class="track-time">4:30</span>
+              </li>
+              <li class="track" role="option" aria-selected="false" tabindex="-1"
+                  data-index="3" data-sleeve="3" data-title="Cadence"
+                  data-artist="Marta Reyes" data-album="Cadence"
+                  data-tint="#be4480" data-length="4:12">
+                <span class="art art-36" data-sleeve="3" aria-hidden="true"></span>
+                <span class="track-id"><span class="track-title">Cadence</span><span class="track-artist">Marta Reyes</span></span>
+                <span class="badge">HR</span>
+                <span class="track-menu"><svg class="ico" aria-hidden="true"><use href="#i-menu"/></svg></span>
+                <span class="track-time">4:12</span>
+              </li>
+              <li class="track" role="option" aria-selected="false" tabindex="-1"
+                  data-index="4" data-sleeve="4" data-title="Sightlines"
+                  data-artist="Oyster Club" data-album="Sightlines"
+                  data-tint="#41beba" data-length="6:02">
+                <span class="art art-36" data-sleeve="4" aria-hidden="true"></span>
+                <span class="track-id"><span class="track-title">Sightlines</span><span class="track-artist">Oyster Club</span></span>
+                <span class="badge">CD</span>
+                <span class="track-menu"><svg class="ico" aria-hidden="true"><use href="#i-menu"/></svg></span>
+                <span class="track-time">6:02</span>
+              </li>
+              <li class="track" role="option" aria-selected="false" tabindex="-1"
+                  data-index="5" data-sleeve="5" data-title="Winter Almanac"
+                  data-artist="Field Notes" data-album="Winter Almanac"
+                  data-tint="" data-length="3:44">
+                <span class="art art-36" data-sleeve="5" aria-hidden="true"></span>
+                <span class="track-id"><span class="track-title">Winter Almanac</span><span class="track-artist">Field Notes</span></span>
+                <span class="badge">CD</span>
+                <span class="track-menu"><svg class="ico" aria-hidden="true"><use href="#i-menu"/></svg></span>
+                <span class="track-time">3:44</span>
+              </li>
+              <li class="track" role="option" aria-selected="false" tabindex="-1"
+                  data-index="6" data-sleeve="0" data-title="Harbour Lights"
+                  data-artist="Halve Moon" data-album="Lantern Season"
+                  data-tint="#bd682a" data-length="4:41">
+                <span class="art art-36" data-sleeve="0" aria-hidden="true"></span>
+                <span class="track-id"><span class="track-title">Harbour Lights</span><span class="track-artist">Halve Moon</span></span>
+                <span class="badge">CD</span>
+                <span class="track-menu"><svg class="ico" aria-hidden="true"><use href="#i-menu"/></svg></span>
+                <span class="track-time">4:41</span>
+              </li>
+              <li class="track" role="option" aria-selected="false" tabindex="-1"
+                  data-index="7" data-sleeve="0" data-title="Stray Current"
+                  data-artist="Halve Moon" data-album="Lantern Season"
+                  data-tint="#bd682a" data-length="3:27">
+                <span class="art art-36" data-sleeve="0" aria-hidden="true"></span>
+                <span class="track-id"><span class="track-title">Stray Current</span><span class="track-artist">Halve Moon</span></span>
+                <span class="badge">CD</span>
+                <span class="track-menu"><svg class="ico" aria-hidden="true"><use href="#i-menu"/></svg></span>
+                <span class="track-time">3:27</span>
+              </li>
+              <li class="track" role="option" aria-selected="false" tabindex="-1"
+                  data-index="8" data-sleeve="1" data-title="Slack Water"
+                  data-artist="The Ninth Wave" data-album="Blue Hour"
+                  data-tint="#2c69be" data-length="4:58">
+                <span class="art art-36" data-sleeve="1" aria-hidden="true"></span>
+                <span class="track-id"><span class="track-title">Slack Water</span><span class="track-artist">The Ninth Wave</span></span>
+                <span class="badge">CD</span>
+                <span class="track-menu"><svg class="ico" aria-hidden="true"><use href="#i-menu"/></svg></span>
+                <span class="track-time">4:58</span>
+              </li>
+              <li class="track" role="option" aria-selected="false" tabindex="-1"
+                  data-index="9" data-sleeve="3" data-title="Bell Tower"
+                  data-artist="Marta Reyes" data-album="Cadence"
+                  data-tint="#be4480" data-length="5:33">
+                <span class="art art-36" data-sleeve="3" aria-hidden="true"></span>
+                <span class="track-id"><span class="track-title">Bell Tower</span><span class="track-artist">Marta Reyes</span></span>
+                <span class="badge">HR</span>
+                <span class="track-menu"><svg class="ico" aria-hidden="true"><use href="#i-menu"/></svg></span>
+                <span class="track-time">5:33</span>
+              </li>
+              <li class="track" role="option" aria-selected="false" tabindex="-1"
+                  data-index="10" data-sleeve="4" data-title="The Undertow"
+                  data-artist="Oyster Club" data-album="Sightlines"
+                  data-tint="#41beba" data-length="5:08">
+                <span class="art art-36" data-sleeve="4" aria-hidden="true"></span>
+                <span class="track-id"><span class="track-title">The Undertow</span><span class="track-artist">Oyster Club</span></span>
+                <span class="badge">CD</span>
+                <span class="track-menu"><svg class="ico" aria-hidden="true"><use href="#i-menu"/></svg></span>
+                <span class="track-time">5:08</span>
+              </li>
+            </ul>
+
+            <div class="queue-foot">
+              <span class="pill"><svg class="ico" aria-hidden="true"><use href="#i-save"/></svg>Save</span>
+              <span class="pill">Edit</span>
+              <span class="pill">Clear</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- The transport bar. The seek rail runs the full width along its top
+             edge; the left group is exactly as wide as the sidebar. -->
+        <div class="transport">
+          <div class="transport-wash" aria-hidden="true"></div>
+          <div class="scrub"><span class="scrub-fill" id="scrubFill"><span class="scrub-handle"></span></span></div>
+
+          <div class="transport-row">
+            <div class="np">
+              <span class="art art-52" id="npArt" data-sleeve="0" aria-hidden="true"></span>
+              <span class="np-id">
+                <span class="np-title" id="npTitle">Lantern Season</span>
+                <span class="np-line"><span class="np-artist" id="npArtist">Halve Moon</span><span class="badge" id="npBadge">HR</span></span>
+              </span>
+            </div>
+
+            <div class="controls">
+              <div class="control-row">
+                <span class="btn btn-ghost btn-icon is-active"><svg class="ico" aria-hidden="true"><use href="#i-shuffle"/></svg></span>
+                <span class="btn btn-ghost btn-icon"><svg class="ico" aria-hidden="true"><use href="#i-previous"/></svg></span>
+                <button class="btn btn-primary btn-round" id="playPause" type="button" aria-label="Pause">
+                  <svg class="ico ico-pause" aria-hidden="true"><use href="#i-pause"/></svg>
+                  <svg class="ico ico-play" aria-hidden="true"><use href="#i-play"/></svg>
+                </button>
+                <span class="btn btn-ghost btn-icon"><svg class="ico" aria-hidden="true"><use href="#i-next"/></svg></span>
+                <span class="btn btn-ghost btn-icon is-active"><svg class="ico" aria-hidden="true"><use href="#i-repeat"/></svg></span>
+              </div>
+              <div class="time-row">
+                <span class="time-now" id="timeNow">1:24</span><span class="time-sep">/</span><span class="time-total" id="timeTotal">3:58</span>
+              </div>
+            </div>
+
+            <div class="right">
+              <button class="chip" id="playerPill" type="button" aria-expanded="false"
+                      aria-controls="playersPop" aria-label="Kitchen — choose a player">
+                <svg class="ico" aria-hidden="true"><use href="#i-player"/></svg>
+                <span id="playerName">Kitchen</span>
+                <svg class="ico ico-chev" aria-hidden="true"><use href="#i-expand"/></svg>
+              </button>
+
+              <div class="level">
+                <span class="btn btn-ghost btn-icon"><svg class="ico" aria-hidden="true"><use href="#i-volume"/></svg></span>
+                <span class="btn btn-ghost btn-icon btn-tiny"><svg class="ico" aria-hidden="true"><use href="#i-less"/></svg></span>
+                <span class="level-bar"><span class="level-fill"></span><span class="level-read">38</span></span>
+                <span class="btn btn-ghost btn-icon btn-tiny"><svg class="ico" aria-hidden="true"><use href="#i-add"/></svg></span>
+              </div>
+
+              <span class="btn btn-ghost btn-icon is-active"><svg class="ico" aria-hidden="true"><use href="#i-queue"/></svg></span>
+            </div>
+          </div>
+
+          <!-- The player list hangs off the pill and opens upward, because on
+               a one-speaker system a permanent list of one is furniture. -->
+          <div class="players" id="playersPop" hidden>
+            <div class="players-head">
+              <span class="section-label">PLAYERS</span>
+              <span class="players-line">3 found · 1 playing</span>
+              <span class="btn btn-ghost btn-icon btn-tiny"><svg class="ico" aria-hidden="true"><use href="#i-rescan"/></svg></span>
+            </div>
+
+            <!-- The app caps this list at 330px — two and a half cards, and
+                 the half is the affordance. -->
+            <div class="devices">
+              <div class="device is-selected">
+                <div class="device-row">
+                  <span class="art art-40" data-sleeve="0" aria-hidden="true"></span>
+                  <span class="device-id"><span class="device-name">Kitchen</span><span class="device-sub">Lantern Season — Halve Moon</span></span>
+                  <svg class="ico ico-sounding" aria-hidden="true"><use href="#i-play"/></svg>
+                </div>
+                <div class="level level-sm">
+                  <span class="btn btn-ghost btn-icon"><svg class="ico" aria-hidden="true"><use href="#i-volume"/></svg></span>
+                  <span class="btn btn-ghost btn-icon btn-tiny"><svg class="ico" aria-hidden="true"><use href="#i-less"/></svg></span>
+                  <span class="level-bar"><span class="level-fill" style="width:38%"></span><span class="level-read">38</span></span>
+                  <span class="btn btn-ghost btn-icon btn-tiny"><svg class="ico" aria-hidden="true"><use href="#i-add"/></svg></span>
+                </div>
+                <div class="device-badges">
+                  <span class="badge badge-round"><svg class="ico" aria-hidden="true"><use href="#i-grouped"/></svg>Leading 2 players</span>
+                  <span class="btn btn-ghost btn-icon btn-tiny is-active"><svg class="ico" aria-hidden="true"><use href="#i-group"/></svg></span>
+                </div>
+              </div>
+
+              <div class="device">
+                <div class="device-row">
+                  <span class="art art-40 art-glyph" aria-hidden="true"><svg class="ico" aria-hidden="true"><use href="#i-grouped"/></svg></span>
+                  <span class="device-id"><span class="device-name">Terrace</span><span class="device-sub">Lantern Season — Halve Moon</span></span>
+                </div>
+                <div class="level level-sm">
+                  <span class="btn btn-ghost btn-icon"><svg class="ico" aria-hidden="true"><use href="#i-volume"/></svg></span>
+                  <span class="btn btn-ghost btn-icon btn-tiny"><svg class="ico" aria-hidden="true"><use href="#i-less"/></svg></span>
+                  <span class="level-bar"><span class="level-fill" style="width:24%"></span><span class="level-read">24</span></span>
+                  <span class="btn btn-ghost btn-icon btn-tiny"><svg class="ico" aria-hidden="true"><use href="#i-add"/></svg></span>
+                </div>
+                <div class="device-badges">
+                  <span class="badge badge-round"><svg class="ico" aria-hidden="true"><use href="#i-grouped"/></svg>Following Kitchen</span>
+                  <span class="btn btn-ghost btn-icon btn-tiny is-active"><svg class="ico" aria-hidden="true"><use href="#i-group"/></svg></span>
+                </div>
+              </div>
+
+              <div class="device">
+                <div class="device-row">
+                  <span class="art art-40 art-glyph" aria-hidden="true"><svg class="ico" aria-hidden="true"><use href="#i-player"/></svg></span>
+                  <span class="device-id"><span class="device-name">Study</span><span class="device-sub">Bluesound Pulse Mini 2i</span></span>
+                </div>
+                <div class="level level-sm">
+                  <span class="btn btn-ghost btn-icon"><svg class="ico" aria-hidden="true"><use href="#i-volume"/></svg></span>
+                  <span class="btn btn-ghost btn-icon btn-tiny"><svg class="ico" aria-hidden="true"><use href="#i-less"/></svg></span>
+                  <span class="level-bar"><span class="level-fill" style="width:12%"></span><span class="level-read">12</span></span>
+                  <span class="btn btn-ghost btn-icon btn-tiny"><svg class="ico" aria-hidden="true"><use href="#i-add"/></svg></span>
+                </div>
+                <div class="device-badges">
+                  <span class="btn btn-ghost btn-icon btn-tiny"><svg class="ico" aria-hidden="true"><use href="#i-group"/></svg></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="players-foot">
+              <span class="wide"><svg class="ico" aria-hidden="true"><use href="#i-group"/></svg>GROUP ALL</span>
+              <span class="wide"><svg class="ico" aria-hidden="true"><use href="#i-pause"/></svg>PAUSE ALL</span>
+            </div>
+            <span class="field field-sm"><span class="placeholder">Add a player by address</span></span>
+          </div>
+        </div>
+      </div>
+
+      <figcaption>
+        The window, rebuilt here in HTML from the geometry in
+        <code>ui/app-window.slint</code>. Pick a track, or open the player list
+        from the pill — the colour behind everything is taken from the sleeve.
+        The music is invented; the layout is not.
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- -------------------------------------------------------- discovery -->
+<section class="band" id="discovery">
+  <div class="wrap wrap-narrow center">
+    <p class="section-label">IT JUST FINDS THEM</p>
+    <h2>Open it. Your speakers are there.</h2>
+    <p class="deck">
+      No pairing, no account, no setup screen. Azzurro finds every BluOS player
+      on your network and remembers them, so one that was switched off last
+      night is waiting when you come back.
+    </p>
+  </div>
+</section>
+
+<!-- -------------------------------------------------------- long poll -->
+<section class="band band-sunken" id="poll">
+  <div class="wrap">
+    <div class="two-up">
+      <article>
+        <p class="section-label">FAST</p>
+        <h2 class="h2-ish">It moves when you do.</h2>
+        <p>
+          Press play and the window has already changed. Change the volume from
+          the remote, or from someone else's phone, and it changes here too —
+          not a second later, not on a refresh.
+        </p>
+      </article>
+      <article>
+        <p class="section-label">LIGHT</p>
+        <h2 class="h2-ish">A real application.</h2>
+        <p>
+          Written in Rust and drawn natively. There is no browser hidden inside
+          it, no Electron, no Qt — which is why it starts instantly, sits at a
+          few tens of megabytes, and does nothing at all while you are not
+          using it.
+        </p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- --------------------------------------------------------- browsing -->
+<section class="band" id="browsing">
+  <div class="wrap wrap-narrow center">
+    <p class="section-label">EVERYTHING, NOT THE HIGHLIGHTS</p>
+    <h2>Your whole library, and every service on the player.</h2>
+    <p class="deck">
+      Artists, albums, songs, genres, composers, folders and playlists, with
+      cover art throughout. Your radio services, your presets, your inputs.
+      Long lists jump to a letter from the keyboard or the alphabet down the
+      side, so two thousand songs is a keystroke rather than a scroll.
+    </p>
+  </div>
+</section>
+
+<!-- ----------------------------------------------------------- colour -->
+<section class="band band-sunken" id="colour">
+  <div class="wrap wrap-narrow center">
+    <p class="section-label">IT LOOKS LIKE THE MUSIC</p>
+    <h2>The room takes its colour from the sleeve.</h2>
+    <p class="deck">
+      Every cover washes the window in its own colour — a red sleeve and a green
+      one feel different from across the room, before you are close enough to
+      read anything. Light and dark themes, and it follows the one your desktop
+      is already using.
+    </p>
+  </div>
+</section>
+
+<!-- -------------------------------------------------- rooms + desktop -->
+<section class="band" id="rooms">
+  <div class="wrap">
+    <div class="two-up">
+      <article>
+        <p class="section-label">EVERY ROOM</p>
+        <h2 class="h2-ish">One speaker, a few, or the whole house.</h2>
+        <p>
+          Group rooms from the player list — one at a time, or everything at
+          once. Each keeps its own volume, so the kitchen can be loud while the
+          bedroom is not.
+        </p>
+      </article>
+      <article>
+        <p class="section-label">EVERY DESKTOP</p>
+        <h2 class="h2-ish">The same app on all three.</h2>
+        <p>
+          Linux, macOS and Windows, from one codebase — not a port and not a web
+          page in a frame. On Linux each speaker also appears to the desktop as
+          its own media player, so your media keys work.
+        </p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ---------------------------------------------------------- missing -->
+<section class="band band-sunken" id="missing">
+  <div class="wrap wrap-narrow center">
+    <p class="section-label">HONESTLY</p>
+    <h2>What is not there yet.</h2>
+    <p class="deck">
+      Bonded stereo pairs still show as two players, named groups cannot be
+      recalled in one press, and anything behind a BluOS account — adding a
+      music service, for one — happens on Lenbrook&rsquo;s site rather than here.
+    </p>
+    <p class="note">
+      It is version 0.1.0, and it is used daily against real hardware.
+    </p>
+  </div>
+</section>
+
+<!-- -------------------------------------------------------------- get -->
+<section class="band" id="get">
+  <div class="wrap wrap-narrow center">
+    <p class="section-label">GET IT</p>
+    <h2>Version 0.1.0.</h2>
+    <p class="deck">
+      Signed checksums for everything. The macOS build is notarised by Apple;
+      the Windows build carries its own C runtime, so it needs nothing else.
+    </p>
+
+    <div class="downloads">
+      <a class="btn btn-primary btn-lg" href="https://github.com/jzbz/azzurro/releases/latest">
+        <svg class="ico" aria-hidden="true"><use href="#i-link"/></svg>Downloads
+      </a>
+      <a class="btn btn-lg" href="https://github.com/jzbz/azzurro">
+        <svg class="ico" aria-hidden="true"><use href="#i-link"/></svg>Source
+      </a>
+    </div>
+
+    <p class="note">Windows, from the package manager it already has:</p>
+
+    <div class="cmd" data-copy="winget install Azzurro.Azzurro">
+      <code>winget install Azzurro.Azzurro</code>
+      <button class="copy" type="button" aria-label="Copy the winget command">
+        <svg class="ico" aria-hidden="true"><use href="#i-file"/></svg>
+      </button>
+    </div>
+
+    <p class="note">macOS, signed and stapled, so it opens on first launch:</p>
+
+    <div class="cmd" data-copy="brew install --cask jzbz/azzurro/azzurro">
+      <code>brew install --cask jzbz/azzurro/azzurro</code>
+      <button class="copy" type="button" aria-label="Copy the Homebrew command">
+        <svg class="ico" aria-hidden="true"><use href="#i-file"/></svg>
+      </button>
+    </div>
+
+    <p class="note">
+      Linux, as a Flatpak bundle for x86_64 or aarch64. It carries its own
+      runtime, so it does not care what your distribution ships.
+    </p>
+
+    <div class="cmd" data-copy="flatpak install --user azzurro-v0.1.0-x86_64.flatpak">
+      <code>flatpak install --user azzurro-v0.1.0-x86_64.flatpak</code>
+      <button class="copy" type="button" aria-label="Copy the Flatpak command">
+        <svg class="ico" aria-hidden="true"><use href="#i-file"/></svg>
+      </button>
+    </div>
+
+    <p class="note">
+      Every release ships a <code>SHA256SUMS</code> signed with
+      <a href="https://jz.bz/">my key</a>. Check it before you trust any of the
+      above &mdash; it is the one artefact that survives a compromise of the
+      rest.
+    </p>
+
+    <div class="cmd cmd-dim" data-copy="gpg --verify SHA256SUMS.asc SHA256SUMS &amp;&amp; sha256sum -c SHA256SUMS">
+      <code>gpg --verify SHA256SUMS.asc SHA256SUMS &amp;&amp; sha256sum -c SHA256SUMS</code>
+      <button class="copy" type="button" aria-label="Copy the verification command">
+        <svg class="ico" aria-hidden="true"><use href="#i-file"/></svg>
+      </button>
+    </div>
+
+    <div class="divider"></div>
+
+    <p class="note">
+      Or build it. Rust 1.85 or newer; on Debian and Ubuntu the Slint crates
+      want two development packages present.
+    </p>
+
+    <div class="cmd cmd-dim" data-copy="sudo apt-get install -y libfontconfig-dev libxkbcommon-dev">
+      <code>sudo apt-get install -y libfontconfig-dev libxkbcommon-dev</code>
+      <button class="copy" type="button" aria-label="Copy the dependency command">
+        <svg class="ico" aria-hidden="true"><use href="#i-file"/></svg>
+      </button>
+    </div>
+
+    <div class="cmd" data-copy="cargo run --bin azzurro">
+      <code>cargo run --bin azzurro</code>
+      <button class="copy" type="button" aria-label="Copy the run command">
+        <svg class="ico" aria-hidden="true"><use href="#i-file"/></svg>
+      </button>
+    </div>
+
+    <p class="note">
+      <code>bluosctl</code> is the same protocol crate with a command line on
+      it, and the fast way to try something against real hardware.
+    </p>
+
+    <div class="cmd cmd-dim" data-copy="cargo run --bin bluosctl -- discover">
+      <code>cargo run --bin bluosctl -- discover</code>
+      <button class="copy" type="button" aria-label="Copy the discover command">
+        <svg class="ico" aria-hidden="true"><use href="#i-file"/></svg>
+      </button>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="colophon">
+  <div class="wrap colophon-inner">
+    <div class="colophon-brand">
+      <svg class="ico ico-32" aria-hidden="true"><use href="#i-sounding"/></svg>
+      <span class="wordmark">AZZURRO</span>
+      <p>A controller for BluOS players — Bluesound, NAD and PSB.</p>
+    </div>
+
+    <nav class="colophon-links" aria-label="Elsewhere">
+      <a href="https://github.com/jzbz/azzurro">Source<svg class="ico" aria-hidden="true"><use href="#i-link"/></svg></a>
+      <a href="https://github.com/jzbz/azzurro/blob/master/docs/protocol.md">The protocol notes<svg class="ico" aria-hidden="true"><use href="#i-link"/></svg></a>
+      <a href="https://github.com/jzbz/azzurro/issues">Issues<svg class="ico" aria-hidden="true"><use href="#i-link"/></svg></a>
+      <a href="https://jz.bz/">jz<svg class="ico" aria-hidden="true"><use href="#i-link"/></svg></a>
+    </nav>
+
+    <p class="colophon-legal">
+      MIT licensed. Icons are <a href="https://lucide.dev">Lucide</a>, ISC;
+      the page is set in Geist and Geo, both under the SIL Open Font License —
+      the same faces the application embeds.
+    </p>
+
+    <p class="colophon-legal">
+      Not affiliated with, endorsed by, or supported by Lenbrook Industries.
+      BluOS, Bluesound, NAD and PSB are their trademarks. Nothing in the
+      protocol notes came from Lenbrook, and none of their code is reproduced.
+    </p>
+  </div>
+</footer>
+
+<script src="assets/main.js"></script>
+</body>
+</html>

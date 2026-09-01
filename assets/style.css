@@ -1,0 +1,1709 @@
+/* azzurro.blue
+ *
+ * The tokens below are transcribed from the app's own design system, in
+ * crates/azzurro-gui/ui/theme.slint. Site and app are meant to read as one
+ * product, so when a value changes there it should change here.
+ */
+
+/* ---------------------------------------------------------------- fonts */
+
+/* Geist — the interface font, bundled the way the app bundles it. Without it
+   the page falls back to whatever the platform resolves, which is not the same
+   face twice; app-window.slint gives the same reasoning for shipping it.
+   Three weights, matching what the UI actually asks for. SIL Open Font
+   License 1.1; see fonts/OFL.txt. */
+@font-face {
+    font-family: "Geist";
+    src: url("fonts/geist-regular.woff2") format("woff2");
+    font-weight: 400;
+    font-display: swap;
+}
+@font-face {
+    font-family: "Geist";
+    src: url("fonts/geist-semibold.woff2") format("woff2");
+    /* The app's own font LICENSE records the finding: Slint resolves the 550
+       weight to SemiBold, so shipping a Medium changed nothing and there is
+       none. CSS font-matching rounds the same way. */
+    font-weight: 600;
+    font-display: swap;
+}
+@font-face {
+    font-family: "Geist";
+    src: url("fonts/geist-bold.woff2") format("woff2");
+    font-weight: 700;
+    font-display: swap;
+}
+
+/* Geo — the wordmark only. Same file the app embeds, in the WOFF2 it started
+   life as. SIL Open Font License 1.1; see fonts/OFL.txt. */
+@font-face {
+    font-family: "Geo";
+    src: url("fonts/geo.woff2") format("woff2");
+    /* Geo ships one weight. Asking for 700 makes the browser smear a fake bold
+       over a display face, so the wordmark is set at 400 and font-synthesis is
+       off wherever it is used. */
+    font-weight: 400;
+    font-display: swap;
+}
+
+/* --------------------------------------------------------------- tokens */
+
+/* Dark is the default for everyone, whatever the system asks for — the app's
+   own theme.slint says the dark palette is the one designed first and the one
+   to judge it by, and this is a page about looking at album art. The theme
+   control opts out into `.light`, and that choice is remembered. */
+:root {
+    /* Surfaces, back to front. Four levels rather than two: the difference
+       between a panel and a row inside it has to be visible without a border
+       on every row. */
+    --bg: #0b0d10;
+    --surface: #14171c;
+    --raised: #1b1f26;
+    --sunken: #0e1116;
+
+    --hover: #ffffff0d;
+    --pressed: #ffffff17;
+    --selected: #38bdf81f;
+
+    /* Glass. The app's panels are translucent rather than filled, so the
+       backdrop below — and the wash taken from the cover — comes through them.
+       Slint has no blur; neither does this, for the same reason the app does
+       not fake one. */
+    --glass: #ffffff0a;
+    --glass-raised: #ffffff14;
+    --rim: #ffffff33;
+    --backdrop-top: #16202e;
+    --backdrop-bottom: #06080b;
+
+    /* The empty half of a progress or volume bar. */
+    --track: #2b313a;
+
+    --border: #ffffff14;
+    --border-strong: #2f3640;
+
+    /* Ink. Three weights: what you read, what you glance at, and what is only
+       there to be found when looked for. */
+    --text: #eef1f5;
+    --dim: #9aa4b2;
+    /* theme.slint has #828d9c, itself already lifted from #5d6673 for failing
+       AA against the surfaces it sits on. The page needs one more nudge for
+       the same reason and not the same surfaces: the queue's own glass sits
+       over a backdrop the cover's colour is washed into, and the durations
+       measured 4.36:1 against that composite at the app's value. This is
+       4.67:1 there, with enough room left that a different sleeve's wash does
+       not take it back under, and it is still clearly the quietest of the
+       three inks. */
+    --faint: #8992a2;
+
+    /* Azzurro, which is the whole reason for the name. Unlike the sibling
+       site, nothing here had to be moved for contrast: #04212e on #38bdf8 is
+       8.0:1, so the app's own accent ink stands. */
+    --accent: #38bdf8;
+    --accent-hover: #7dd3fc;
+    --accent-ink: #04212e;
+    --accent-soft: #38bdf826;
+
+    /* Spacing. The app names its four by what they separate — tight 4, gap 8,
+       pad 12, room 18 — and the page needs three more above them. */
+    --s1: 4px;
+    --s2: 8px;
+    --s3: 12px;
+    --s4: 18px;
+    --s5: 24px;
+    --s6: 32px;
+    --s7: 48px;
+
+    --r-sm: 8px;
+    --r-md: 12px;
+    /* Artwork rounds less than furniture does, and does not round more as it
+       grows. */
+    --r-art: 6px;
+    --r-art-lg: 16px;
+
+    /* Type. The first six are the app's own scale, used at those exact sizes
+       inside the window rebuilt below; the page's own headings step up from
+       them. */
+    --t-micro: 10.5px;
+    --t-small: 11.5px;
+    --t-body: 13px;
+    --t-title: 15px;
+    --t-heading: 17px;
+    --t-display: 21px;
+
+    --t-prose: 16px;
+    --t-deck: 19px;
+
+    --w-regular: 400;
+    --w-medium: 600;
+    --w-bold: 700;
+
+    /* Motion, as the app's three durations with a rule each. `quick` answers a
+       pointer, `settle` is content arriving from somewhere else, `ambient` is
+       the wash and anything else nobody is looking at. */
+    --quick: 120ms;
+    --settle: 220ms;
+    --ambient: 600ms;
+
+    /* app-window.slint sets default-font-family: "Geist"; so does the page.
+       The rest of the stack is only a fallback for a failed font load. There
+       is no monospace face here because the application ships none — machine
+       values get whatever the platform calls its monospace font. */
+    --ui: "Geist", system-ui, -apple-system, "Segoe UI", Roboto,
+        "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+        "Liberation Mono", monospace;
+}
+
+/* Chosen from the theme control only. theme.slint calls light a faithful
+   inversion rather than an afterthought, and these are its values. */
+:root.light {
+    --bg: #f4f6f8;
+    --surface: #ffffff;
+    --raised: #f1f4f7;
+    --sunken: #e8ecf1;
+
+    --hover: #0000000a;
+    --pressed: #00000014;
+    --selected: #0284c714;
+
+    --glass: #ffffffd9;
+    --glass-raised: #ffffffef;
+    --rim: #ffffff;
+    --backdrop-top: #eef2f7;
+    --backdrop-bottom: #dfe5ec;
+
+    --track: #d2d9e2;
+
+    --border: #e3e7ed;
+    --border-strong: #ccd3dc;
+
+    --text: #12161c;
+    --dim: #5b6572;
+    /* Light needs more of a move than dark did: theme.slint's #6e7785 is
+       3.81:1 on sunken, which carries the queue's own status line. This is
+       4.53:1 on the worst of them. */
+    --faint: #636b78;
+
+    /* A step darker than the obvious one, because #0284c7 on white is 3.9:1 —
+       under AA for the small text that carries it. */
+    --accent: #0673ad;
+    --accent-hover: #0369a1;
+    --accent-ink: #ffffff;
+    --accent-soft: #0284c714;
+}
+
+/* Held for one frame while the theme is switched.
+ *
+ * A transition whose value comes from a custom property does not re-run when
+ * that property changes: the element keeps the colour it settled on, so the
+ * header, the player pill and the sleeve swatches stayed on the old palette
+ * while everything around them changed. Switching with transitions off is also
+ * the better behaviour on its own — a theme change is one decision, not three
+ * hundred elements cross-fading at their own pace.
+ */
+:root.theming *,
+:root.theming *::before,
+:root.theming *::after {
+    transition: none !important;
+}
+
+/* ----------------------------------------------------------------- base */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+/* `hidden` has to outrank the display any component sets, or the theme control
+   — which ships hidden and is revealed by main.js — is visible until then. */
+[hidden] { display: none !important; }
+
+html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+    /* The header is sticky and 58px tall; without this an in-page jump lands
+       with the heading underneath it. */
+    scroll-padding-top: 76px;
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--ui);
+    font-size: var(--t-prose);
+    font-synthesis: none;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, p, ul, ol, figure, blockquote, dl, dd { margin: 0; }
+ul, ol { padding: 0; list-style: none; }
+
+a {
+    color: var(--accent);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+}
+a:hover { color: var(--accent-hover); }
+
+code, kbd, samp, pre { font-family: var(--mono); font-synthesis: none; }
+code { font-size: 0.88em; }
+
+svg { display: block; }
+
+:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: var(--r-sm);
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px; height: 1px;
+    margin: -1px; padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+.skip {
+    position: absolute;
+    left: var(--s3);
+    top: -100px;
+    z-index: 20;
+    padding: var(--s2) var(--s3);
+    border-radius: var(--r-sm);
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-size: var(--t-body);
+    font-weight: var(--w-medium);
+    text-decoration: none;
+    transition: top var(--quick) ease-out;
+}
+.skip:focus { top: var(--s3); color: var(--accent-ink); }
+
+.sprite { position: absolute; }
+
+/* Icons. Lucide's whole set is one 24x24 grid on a 2px round-cap stroke, so
+   the attributes live here once rather than on every symbol. */
+.ico {
+    width: 16px; height: 16px;
+    flex: none;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.ico-24 { width: 24px; height: 24px; }
+.ico-32 { width: 32px; height: 32px; }
+
+/* ------------------------------------------------------------ containers */
+
+.wrap {
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 var(--s5);
+}
+/* 1180px plus gutters: the width at which the window below still holds its
+   268px rail, its 330px queue and a centre pane wide enough to be one. */
+.wrap-wide {
+    width: 100%;
+    max-width: 1228px;
+    margin: 0 auto;
+    padding: 0 var(--s5);
+}
+.wrap-narrow { max-width: 760px; }
+.center { text-align: center; }
+
+/* ---------------------------------------------------------- page chrome */
+
+.site-head {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    height: 58px;
+    border-bottom: 1px solid transparent;
+    /* The flat colour is the fallback: a declaration using color-mix is
+       dropped whole where color-mix is not understood, and this bar has
+       nothing else behind it. */
+    background: var(--bg);
+    background: color-mix(in srgb, var(--bg) 86%, transparent);
+    -webkit-backdrop-filter: saturate(1.4) blur(12px);
+    backdrop-filter: saturate(1.4) blur(12px);
+    transition: border-color var(--quick) ease-out,
+                background-color var(--quick) ease-out;
+}
+.site-head.is-stuck {
+    border-bottom-color: var(--border);
+    background: var(--bg);
+    background: color-mix(in srgb, var(--bg) 94%, transparent);
+}
+
+.head-inner {
+    display: flex;
+    align-items: center;
+    gap: var(--s5);
+    height: 100%;
+    /* Same as .wrap-wide, so the wordmark lines up with the window below. */
+    max-width: 1228px;
+    margin: 0 auto;
+    padding: 0 var(--s5);
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: var(--s2);
+    color: var(--text);
+    text-decoration: none;
+}
+.brand .ico { color: var(--accent); }
+.brand-word,
+.wordmark {
+    font-family: "Geo", var(--ui);
+    font-weight: 400;
+    letter-spacing: 0.14em;
+    /* Geo's caps ride high in the line box; app-window.slint nudges the
+       wordmark down for the same reason. */
+    padding-top: 0.14em;
+    line-height: 1;
+}
+.brand-word { font-size: 20px; }
+
+.head-nav {
+    display: flex;
+    gap: var(--s5);
+    margin-right: auto;
+    font-size: var(--t-body);
+}
+.head-nav a {
+    color: var(--dim);
+    text-decoration: none;
+    transition: color var(--quick) ease-out;
+}
+.head-nav a:hover { color: var(--text); }
+
+.head-actions { display: flex; align-items: center; gap: var(--s2); }
+
+/* --------------------------------------------------------------- buttons */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--s2);
+    height: 34px;
+    padding: 0 var(--s3);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    background: var(--raised);
+    color: var(--text);
+    font: inherit;
+    font-size: var(--t-body);
+    font-weight: var(--w-medium);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background-color var(--quick) ease-out, color var(--quick) ease-out,
+                border-color var(--quick) ease-out;
+}
+/* Most `.btn`s in the window rebuild are inert spans — furniture, not
+   controls — so the hand belongs only on the ones that really are one. */
+a.btn, button.btn { cursor: pointer; }
+.btn:hover { background: var(--glass-raised); color: var(--text); }
+.btn-primary {
+    border-color: transparent;
+    background: var(--accent);
+    color: var(--accent-ink);
+}
+.btn-primary:hover { background: var(--accent-hover); color: var(--accent-ink); }
+.btn-ghost { border-color: transparent; background: transparent; color: var(--dim); }
+.btn-ghost:hover { background: var(--hover); color: var(--text); }
+.btn-icon { width: 34px; padding: 0; }
+.btn-tiny { width: 22px; height: 22px; }
+.btn-tiny .ico { width: 12px; height: 12px; }
+.btn-lg { height: 44px; padding: 0 var(--s5); font-size: var(--t-title); }
+/* IconButton's `active`: the app fills it as well as inking it, which is what
+   makes shuffle-on legible without reading the glyph. */
+.btn.is-active { color: var(--accent); background: var(--accent-soft); }
+.btn.is-quiet { opacity: 0.35; }
+
+#theme-toggle { cursor: pointer; }
+.ico-moon { display: none; }
+:root.light .ico-sun { display: none; }
+:root.light .ico-moon { display: block; }
+
+/* ------------------------------------------------------------------ hero */
+
+.hero { padding: 96px 0 72px; }
+
+.eyebrow {
+    color: var(--faint);
+    font-size: var(--t-body);
+    font-weight: var(--w-medium);
+    letter-spacing: 0.02em;
+}
+
+.hero-h1 {
+    margin-top: var(--s4);
+    font-size: clamp(40px, 7.4vw, 76px);
+    font-weight: var(--w-bold);
+    line-height: 1.02;
+    letter-spacing: -0.035em;
+}
+
+.hero-deck {
+    max-width: 62ch;
+    margin-top: var(--s5);
+    color: var(--dim);
+    font-size: var(--t-deck);
+    line-height: 1.55;
+}
+
+.hero-stack {
+    margin-top: var(--s5);
+    color: var(--faint);
+    font-size: var(--t-body);
+    line-height: 2;
+}
+.negations { display: inline-flex; flex-wrap: wrap; gap: var(--s2); }
+.negations span {
+    padding: 2px var(--s2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: var(--t-small);
+    letter-spacing: 0.02em;
+}
+
+.hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s3);
+    margin-top: var(--s6);
+}
+
+.hero-status {
+    max-width: 74ch;
+    margin-top: var(--s6);
+    padding-left: var(--s4);
+    border-left: 2px solid var(--border-strong);
+    color: var(--faint);
+    font-size: var(--t-body);
+    line-height: 1.7;
+}
+.hero-status strong { color: var(--dim); font-weight: var(--w-medium); }
+
+/* ------------------------------------------------------- the app window
+ *
+ * Rebuilt from the app's own geometry in ui/app-window.slint: a 268px rail, a
+ * flexible centre, a 330px queue and an 88px transport bar. Every size in here
+ * is the app's own value at the app's own scale, so this is the window at
+ * 1180px rather than a picture of it — which is also why it stops being a
+ * window at all below 760px instead of folding into a phone layout it never
+ * has.
+ */
+
+.window-section { padding-bottom: 96px; }
+
+.stage { position: relative; }
+
+.win {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--r-md);
+    /* backdrop-top to backdrop-bottom at 155deg, stopping at 68% — the app's
+       own backdrop, and the reason the translucent panels have something
+       worth seeing through to. */
+    background: linear-gradient(155deg, var(--backdrop-top) 0%,
+                                        var(--backdrop-bottom) 68%);
+    box-shadow: 0 24px 70px #00000059;
+    font-size: var(--t-body);
+    line-height: 1.35;
+    user-select: none;
+}
+
+/* The window-wide wash: a radial of the colour taken from the sleeve, behind
+   every panel, which is why the panels are translucent. `--tint` is set by
+   main.js from the pixels of the sleeve itself; with no tint it is absent and
+   this draws nothing. */
+.win-wash {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 50%,
+        color-mix(in srgb, var(--tint, transparent) 30%, transparent) 0%,
+        color-mix(in srgb, var(--tint, transparent) 10%, transparent) 38%,
+        transparent 72%);
+    opacity: 0;
+    transition: opacity var(--ambient) ease-out,
+                background var(--ambient) ease-out;
+    pointer-events: none;
+}
+.win.has-tint .win-wash { opacity: 1; }
+
+.win-bar {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    height: 34px;
+    padding: 0 var(--s3);
+    border-bottom: 1px solid var(--border);
+    background: color-mix(in srgb, var(--backdrop-bottom) 55%, transparent);
+}
+.dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--border-strong);
+}
+.win-title {
+    flex: 1;
+    color: var(--faint);
+    font-size: var(--t-small);
+    text-align: center;
+    /* Balance the three dots so the title is centred in the strip, not in
+       what is left of it. */
+    margin-right: 51px;
+}
+
+/* Near enough the app's own proportion: app-window.slint asks for 1440x920,
+   and this is that window at 1180. Tall enough, too, for the centre pane's
+   blocks to stand at their natural sizes — shorter than that and the column
+   overflows, flex shrinks everything in it, and the shelf captions, which
+   carry `overflow: hidden` and so have an automatic minimum size of zero,
+   collapse to nothing. */
+.win-body {
+    position: relative;
+    display: flex;
+    height: 740px;
+}
+
+/* ------------------------------------------------------------ the rail */
+
+.rail {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s2);
+    width: 268px;
+    flex: none;
+    padding: var(--s4) 0 var(--s2);
+    border-right: 1px solid var(--border);
+    background: var(--glass);
+}
+
+.rail-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 var(--s3) 0 var(--s4);
+    margin-bottom: var(--s1);
+}
+.rail-brand .ico { color: var(--accent); }
+.rail .wordmark { font-size: 27px; letter-spacing: 0.11em; }
+
+.section-label {
+    color: var(--faint);
+    font-size: var(--t-micro);
+    font-weight: var(--w-bold);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+/* Words that came off the wire are not uppercased — the player wrote them. */
+.rail-label:not(:first-of-type) {
+    font-weight: var(--w-medium);
+    letter-spacing: 0;
+    text-transform: none;
+}
+.rail-label { padding: var(--s2) var(--s2) 0 var(--s4); }
+
+.rail-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--s3);
+    height: 40px;
+    padding: 0 var(--s3) 0 var(--s4);
+    color: var(--dim);
+    font-size: var(--t-title);
+}
+.rail-item .ico { width: 19px; height: 19px; }
+.rail-item.is-active { color: var(--text); background: var(--selected); }
+.rail-item.is-active .ico { color: var(--accent); }
+/* The selection rule down the left edge, inset top and bottom. */
+.rail-item.is-active::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 6px; bottom: 6px;
+    width: 3px;
+    background: var(--accent);
+}
+.rail-spacer { flex: 1; }
+
+/* --------------------------------------------------------- the centre */
+
+.content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    padding-top: var(--s3);
+    overflow: hidden;
+}
+/* Nothing in here shrinks. The app's centre pane is a scroller: content taller
+   than the pane is clipped by it, never squeezed into it. */
+.content > * { flex: none; }
+
+.browse-head {
+    display: flex;
+    align-items: center;
+    gap: var(--s2);
+    padding: 0 var(--s3) var(--s3);
+}
+.browse-title {
+    flex: 1;
+    min-width: 0;
+    color: var(--text);
+    font-size: var(--t-heading);
+    font-weight: var(--w-medium);
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.select {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 30px;
+    padding: 0 9px 0 11px;
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    color: var(--text);
+    font-size: var(--t-small);
+}
+.select .ico { width: 15px; height: 15px; color: var(--dim); }
+.select .ico:last-child { width: 13px; height: 13px; color: var(--faint); }
+
+.browse-search { padding: 0 var(--s3) var(--s2); }
+.field {
+    display: flex;
+    align-items: center;
+    gap: var(--s2);
+    height: 38px;
+    padding: 0 var(--s3);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    background: var(--sunken);
+}
+.field .ico { width: 15px; height: 15px; color: var(--faint); }
+.field .placeholder { color: var(--faint); font-size: var(--t-body); }
+.field-sm { height: 32px; margin-top: var(--s1); }
+
+.screen-head {
+    display: flex;
+    gap: var(--s4);
+    padding: 0 var(--s3) var(--s3);
+}
+.screen-id { display: flex; flex-direction: column; gap: var(--s1); justify-content: center; min-width: 0; }
+.screen-title {
+    font-size: var(--t-display);
+    font-weight: var(--w-medium);
+    letter-spacing: -0.01em;
+}
+.screen-sub { color: var(--dim); font-size: var(--t-title); }
+.screen-detail { color: var(--faint); font-size: var(--t-small); }
+
+.shelf-label { padding: 0 var(--s3) var(--s1); font-weight: var(--w-medium); letter-spacing: 0; text-transform: none; }
+.shelf {
+    display: flex;
+    gap: 0;
+    padding: 0 var(--s3);
+    overflow: hidden;
+}
+.tile {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    width: 128px;
+    flex: none;
+    padding: 6px;
+    border-radius: var(--r-sm);
+}
+.tile-title {
+    font-size: var(--t-small);
+    font-weight: var(--w-medium);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.tile-sub { color: var(--faint); font-size: var(--t-micro); }
+
+/* BrowseRowView. The numeral column exists only on an album screen, which is
+   the one place the player sends track numbers. */
+.rows { padding: 0 var(--s3); margin-bottom: auto; }
+.brow {
+    display: flex;
+    align-items: center;
+    gap: var(--s2);
+    height: 52px;
+    padding: 0 var(--s2);
+    border-radius: var(--r-sm);
+}
+.brow-n {
+    width: 20px;
+    flex: none;
+    color: var(--faint);
+    font-size: var(--t-small);
+    font-weight: var(--w-regular);
+    text-align: right;
+}
+.brow-go { width: 15px; height: 15px; color: var(--faint); }
+/* A row that is playing swaps its chevron for the sounding glyph — what is
+   making the sound, which is a different statement from "press me". */
+.brow-sounding { color: var(--accent); }
+.brow.is-playing .track-title { color: var(--accent); font-weight: var(--w-medium); }
+
+/* ---------------------------------------------------------- the queue */
+
+.queue {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s2);
+    width: 330px;
+    flex: none;
+    padding: var(--s4) var(--s2) var(--s2);
+    border-left: 1px solid var(--border);
+    background: var(--glass);
+}
+.queue-head { display: flex; align-items: baseline; gap: var(--s2); padding-left: var(--s2); }
+.queue-title { font-size: var(--t-title); font-weight: var(--w-medium); }
+.queue-line { margin-left: auto; color: var(--faint); font-size: var(--t-small); }
+
+.tracks { flex: 1; overflow: hidden; }
+
+.queue-band {
+    display: flex;
+    align-items: flex-end;
+    height: 26px;
+    padding-left: var(--s2);
+    color: var(--faint);
+    font-size: var(--t-micro);
+    font-weight: var(--w-bold);
+    letter-spacing: 0.08em;
+}
+
+.track {
+    display: flex;
+    align-items: center;
+    gap: var(--s2);
+    height: 52px;
+    padding: 0 var(--s2);
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    transition: background-color var(--quick) ease-out;
+}
+.track:hover { background: var(--hover); }
+.track.is-live { background: var(--selected); }
+.track:focus-visible { outline-offset: -2px; }
+
+.track-id { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.track-title,
+.track-artist {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.track-title { font-size: var(--t-body); }
+.track.is-live .track-title { color: var(--accent); font-weight: var(--w-medium); }
+.track-artist { color: var(--dim); font-size: var(--t-small); }
+.track-menu {
+    display: grid;
+    place-items: center;
+    width: 30px; height: 30px;
+    flex: none;
+    color: var(--faint);
+    opacity: 0.45;
+    transition: opacity var(--quick) ease-out;
+}
+.track-menu .ico { width: 15px; height: 15px; }
+.track:hover .track-menu { opacity: 1; }
+.track-time {
+    width: 36px;
+    color: var(--faint);
+    font-size: var(--t-small);
+    text-align: right;
+}
+
+.badge {
+    flex: none;
+    padding: 0 6px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--raised);
+    color: var(--faint);
+    font-size: var(--t-micro);
+    font-weight: var(--w-bold);
+    letter-spacing: 0.04em;
+    line-height: 16px;
+}
+/* widgets.slint's `Badge` — a different component from the quality badge
+   above: filled, no border, no tracking, and fully round. */
+.badge-round {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--raised);
+    font-weight: var(--w-regular);
+    letter-spacing: 0;
+    line-height: 18px;
+}
+.badge-round .ico { width: 11px; height: 11px; }
+
+.queue-foot { display: flex; gap: var(--s1); justify-content: center; }
+
+/* PillButton. widgets.slint calls the rounded-rectangle shape deliberate, so
+   this is radius-small and not a lozenge. */
+.pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 30px;
+    padding: 0 var(--s3);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    background: transparent;
+    color: var(--text);
+    font-size: var(--t-body);
+    font-weight: var(--w-regular);
+}
+.pill .ico { width: 14px; height: 14px; }
+.pill-primary { border-color: transparent; background: var(--accent); color: var(--accent-ink); }
+.pills { display: flex; flex-wrap: wrap; gap: var(--s2); }
+
+/* ------------------------------------------------------ the transport */
+
+.transport {
+    position: relative;
+    height: 88px;
+    /* The app draws this hairline at half strength in both places it uses the
+       token, so the token is not the whole story. */
+    border-top: 1px solid color-mix(in srgb, var(--rim) 50%, transparent);
+    background: var(--glass-raised);
+}
+/* The transport takes the same colour left-to-right, fading out at 60%. */
+.transport-wash {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg,
+        color-mix(in srgb, var(--tint, transparent) 14%, transparent) 0%,
+        transparent 60%);
+    opacity: 0;
+    transition: opacity var(--ambient) ease-out,
+                background var(--ambient) ease-out;
+    pointer-events: none;
+}
+.win.has-tint .transport-wash { opacity: 1; }
+
+/* The seek rail runs the full width along the top edge, not inside a group. */
+.scrub {
+    position: relative;
+    height: 12px;
+    display: flex;
+    align-items: center;
+}
+.scrub::before {
+    content: "";
+    position: absolute;
+    inset: 4px 0;
+    border-radius: 2px;
+    background: var(--track);
+}
+.scrub-fill {
+    position: relative;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--accent);
+    transition: width 1s linear;
+}
+.scrub-handle {
+    position: absolute;
+    right: -5px; top: -3.5px;
+    width: 11px; height: 11px;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0;
+    transition: opacity var(--quick) ease-out;
+}
+.transport:hover .scrub-handle { opacity: 1; }
+
+.transport-row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--s3);
+    padding: var(--s1) var(--s3) var(--s2);
+}
+
+/* Exactly as wide as the rail, so the sleeve sits under the wordmark. */
+.np { display: flex; align-items: center; gap: var(--s3); width: 268px; flex: none; min-width: 0; }
+.np-id { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.np-title {
+    font-size: var(--t-title);
+    font-weight: var(--w-medium);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.np-line { display: flex; align-items: center; gap: var(--s2); min-width: 0; }
+.np-artist {
+    color: var(--dim);
+    font-size: var(--t-small);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.controls { flex: 1; display: flex; flex-direction: column; align-items: center; }
+.control-row { display: flex; align-items: center; gap: var(--s2); }
+.btn-round {
+    width: 44px; height: 44px;
+    padding: 0;
+    border-radius: 50%;
+}
+.btn-round .ico { width: 19px; height: 19px; }
+.ico-play { display: none; }
+.win.is-paused .ico-play { display: block; }
+.win.is-paused .ico-pause { display: none; }
+
+.time-row {
+    display: flex;
+    align-items: center;
+    gap: var(--s1);
+    padding-top: 2px;
+    font-size: var(--t-small);
+}
+/* A fixed box, right-aligned: Geist's figures are proportional and would slide
+   the whole group sideways on every tick. */
+.time-now { width: 34px; color: var(--dim); text-align: right; }
+.time-sep, .time-total { color: var(--faint); }
+
+.right { display: flex; align-items: center; justify-content: flex-end; gap: var(--s2); width: 420px; flex: none; }
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 9px 0 11px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--raised);
+    color: var(--text);
+    font: inherit;
+    font-size: var(--t-small);
+    cursor: pointer;
+    transition: background-color var(--quick) ease-out;
+}
+.chip:hover { background: var(--glass-raised); }
+.chip .ico { width: 14px; height: 14px; color: var(--dim); }
+.chip .ico-chev { width: 13px; height: 13px; color: var(--faint); transition: transform var(--quick) ease-out; }
+.chip[aria-expanded="true"] .ico-chev { transform: rotate(180deg); }
+
+/* The volume control: mute, minus, the bar, plus — with the reading riding on
+   the middle of the bar rather than beside it. */
+.level { display: flex; align-items: center; gap: var(--s1); width: 208px; }
+.level-sm { width: auto; }
+/* Level's own buttons are smaller than the transport's: 26px for mute, 22px
+   for the two steps. */
+.level > .btn { width: 26px; height: 26px; }
+.level > .btn .ico { width: 15px; height: 15px; }
+.level > .btn-tiny { width: 22px; height: 22px; }
+.level > .btn-tiny .ico { width: 12px; height: 12px; }
+.level-bar {
+    position: relative;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    height: 18px;
+}
+.level-bar::before {
+    content: "";
+    position: absolute;
+    inset: 7px 0;
+    border-radius: 2px;
+    background: var(--track);
+}
+.level-fill {
+    position: relative;
+    width: 38%;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--accent);
+}
+.level-read {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 32px;
+    height: 17px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--dim);
+    font-size: var(--t-micro);
+    font-weight: var(--w-medium);
+    line-height: 15px;
+    text-align: center;
+}
+
+/* --------------------------------------------------- the player list */
+
+/* It opens upward off the pill, because on a one-speaker system a permanent
+   list of one is furniture. */
+.players {
+    position: absolute;
+    right: var(--s5);
+    bottom: calc(100% + 10px);
+    z-index: 3;
+    width: 340px;
+    padding: var(--s2);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--r-md);
+    background: var(--surface);
+    box-shadow: 0 18px 44px #00000073;
+}
+.players[hidden] { display: none; }
+.players-head { display: flex; align-items: center; gap: var(--s2); padding-left: var(--s2); }
+.players-line { margin-left: auto; color: var(--faint); font-size: var(--t-micro); }
+
+/* Two and a half cards at the app's 132px pitch, and the half is the
+   affordance. */
+.devices { max-height: 330px; overflow: hidden; }
+
+.device { padding: var(--s3) var(--s3) var(--s3) 16px; border-radius: var(--r-sm); position: relative; }
+.device.is-selected { background: var(--selected); }
+.device.is-selected::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 8px; bottom: 8px;
+    width: 3px;
+    border-radius: 1.5px;
+    background: var(--accent);
+}
+.device-row { display: flex; align-items: center; gap: var(--s2); }
+.device-id { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.device-name {
+    font-size: var(--t-title);
+    font-weight: var(--w-medium);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.device-sub {
+    color: var(--dim);
+    font-size: var(--t-small);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.ico-sounding { width: 13px; height: 13px; color: var(--accent); align-self: flex-start; margin-top: 4px; }
+.device .level { margin-top: 6px; }
+.device-badges { display: flex; align-items: center; gap: var(--s2); margin-top: 2px; }
+.device-badges .btn { margin-left: auto; }
+
+.players-foot { display: flex; gap: var(--s1); padding-top: var(--s1); }
+.wide {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    height: 46px;
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    background: var(--raised);
+    color: var(--dim);
+    font-size: var(--t-micro);
+    font-weight: var(--w-medium);
+    letter-spacing: 0.06em;
+}
+.wide .ico { width: 16px; height: 16px; }
+
+/* ------------------------------------------------------------ artwork */
+
+/* One sleeve file serves the window and the colour demo below, so the swatch
+   being measured there is the artwork being shown here. */
+.art {
+    display: block;
+    flex: none;
+    border-radius: var(--r-art);
+    background-color: var(--raised);
+    background-size: cover;
+    background-position: center;
+}
+.art[data-sleeve="0"] { background-image: url("images/sleeve-0.svg"); }
+.art[data-sleeve="1"] { background-image: url("images/sleeve-1.svg"); }
+.art[data-sleeve="2"] { background-image: url("images/sleeve-2.svg"); }
+.art[data-sleeve="3"] { background-image: url("images/sleeve-3.svg"); }
+.art[data-sleeve="4"] { background-image: url("images/sleeve-4.svg"); }
+.art[data-sleeve="5"] { background-image: url("images/sleeve-5.svg"); }
+
+.art-36 { width: 36px; height: 36px; }
+.art-40 { width: 40px; height: 40px; }
+.art-52 { width: 52px; height: 52px; }
+.art-160 { width: 160px; height: 160px; border-radius: 10px; }
+.art-tile { width: 116px; height: 116px; border-radius: 8px; position: relative; }
+.art-glyph { display: grid; place-items: center; color: var(--faint); }
+
+/* Deliberately not a play triangle: this one means "what is making the
+   sound", which is a different statement from "press me". */
+.art-tile.is-playing::after {
+    content: "";
+    position: absolute;
+    right: 6px; bottom: 6px;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--accent);
+    /* The sounding glyph, drawn as four bars in the accent's ink rather than
+       carried here as a second copy of the icon. */
+    background-image:
+        linear-gradient(var(--accent-ink), var(--accent-ink)),
+        linear-gradient(var(--accent-ink), var(--accent-ink)),
+        linear-gradient(var(--accent-ink), var(--accent-ink)),
+        linear-gradient(var(--accent-ink), var(--accent-ink));
+    background-repeat: no-repeat;
+    background-size: 1.5px 5px, 1.5px 10px, 1.5px 7px, 1.5px 4px;
+    background-position: 6px 8.5px, 9px 6px, 12px 7.5px, 15px 9px;
+}
+
+.stage figcaption {
+    max-width: 76ch;
+    margin: var(--s4) auto 0;
+    color: var(--faint);
+    font-size: var(--t-body);
+    text-align: center;
+}
+
+/* -------------------------------------------------------------- bands */
+
+.band { padding: 96px 0; border-top: 1px solid var(--border); }
+.band-sunken { background: var(--sunken); }
+
+.band h2 {
+    margin-top: var(--s3);
+    font-size: clamp(27px, 3.6vw, 40px);
+    font-weight: var(--w-bold);
+    line-height: 1.14;
+    letter-spacing: -0.025em;
+}
+.band .h2-ish, .h2-ish { font-size: clamp(21px, 2.4vw, 27px); }
+
+.deck {
+    max-width: 68ch;
+    margin-top: var(--s4);
+    color: var(--dim);
+    font-size: var(--t-deck);
+    line-height: 1.55;
+}
+
+.note {
+    max-width: 76ch;
+    margin-top: var(--s5);
+    color: var(--dim);
+    font-size: var(--t-prose);
+    line-height: 1.7;
+}
+.center .note { margin-left: auto; margin-right: auto; }
+.dim { color: var(--faint); }
+p.dim { font-size: var(--t-body); }
+
+.pullquote {
+    max-width: 72ch;
+    margin-top: var(--s6);
+    padding-left: var(--s5);
+    border-left: 2px solid var(--accent);
+    color: var(--text);
+    font-size: clamp(17px, 2vw, 21px);
+    line-height: 1.5;
+}
+
+.two-up {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--s5);
+    margin-top: var(--s6);
+}
+.two-up-uneven { gap: var(--s7); }
+
+.card {
+    padding: var(--s5);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    background: var(--surface);
+}
+.card-plain { background: transparent; }
+.card h3,
+.two-up h3 {
+    font-size: var(--t-heading);
+    font-weight: var(--w-medium);
+    letter-spacing: -0.01em;
+}
+.card h3 + p { margin-top: var(--s3); }
+.card p + p,
+.two-up p + p { margin-top: var(--s3); }
+.card p,
+.two-up p { color: var(--dim); font-size: var(--t-prose); line-height: 1.66; }
+.two-up .section-label + .h2-ish { margin-top: var(--s2); }
+.two-up article > h2 + p { margin-top: var(--s4); }
+
+.divider { height: 1px; background: var(--border); }
+.divider-spaced { margin: var(--s6) 0; }
+
+.path {
+    display: inline-block;
+    margin-top: var(--s3);
+    padding: var(--s1) var(--s2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-art);
+    background: var(--sunken);
+    color: var(--dim);
+    font-size: var(--t-body);
+}
+
+.verbs { display: flex; flex-wrap: wrap; gap: var(--s1); margin-top: var(--s3); }
+.verbs code {
+    padding: 2px var(--s2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--sunken);
+    color: var(--dim);
+    font-size: var(--t-small);
+}
+
+/* --------------------------------------------------------- cmd blocks */
+
+.cmd {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: var(--s2);
+    margin-top: var(--s4);
+    padding: var(--s3) var(--s3) var(--s3) var(--s4);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    background: var(--sunken);
+    text-align: left;
+}
+.cmd code {
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    color: var(--text);
+    font-size: var(--t-body);
+    line-height: 1.7;
+    white-space: pre;
+    scrollbar-width: thin;
+}
+.cmd-dim code { color: var(--dim); }
+.cmd .copy {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 30px; height: 30px;
+    border: 1px solid transparent;
+    border-radius: var(--r-art);
+    background: transparent;
+    color: var(--faint);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity var(--quick) ease-out, color var(--quick) ease-out;
+}
+.cmd:hover .copy,
+.cmd .copy:focus-visible { opacity: 1; }
+.cmd .copy:hover { color: var(--text); background: var(--hover); }
+.cmd.is-copied .copy { opacity: 1; color: var(--accent); }
+
+/* -------------------------------------------------------- the packet */
+
+.packet {
+    margin-top: var(--s5);
+    padding: var(--s5);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    background: var(--surface);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+}
+.packet pre { margin: 0; }
+.packet code { font-size: var(--t-title); line-height: 2; letter-spacing: 0.04em; }
+.pk-a { color: var(--accent); }
+.pk-b { color: var(--text); }
+.pk-c { color: var(--dim); }
+.pk-d { color: var(--faint); }
+.pk-x { color: var(--faint); font-size: var(--t-body); letter-spacing: 0; }
+.packet figcaption {
+    max-width: 72ch;
+    margin-top: var(--s4);
+    color: var(--dim);
+    font-size: var(--t-body);
+    line-height: 1.7;
+}
+
+/* --------------------------------------------------------- the graph */
+
+.graph-figure {
+    margin-top: var(--s6);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+}
+.graph { width: 100%; min-width: 620px; height: auto; overflow: visible; }
+.graph .ax line { stroke: var(--border-strong); stroke-width: 1; }
+.graph .ax-label { fill: var(--dim); font-size: 13px; font-weight: 600; }
+.graph .ev line { stroke: var(--border-strong); stroke-width: 1; stroke-dasharray: 3 4; }
+.graph .ev text { fill: var(--faint); font-size: 11px; text-anchor: middle; }
+.graph .poll-ticks circle { fill: var(--faint); }
+.graph .late path { stroke: var(--faint); stroke-width: 3; stroke-linecap: round; }
+.graph .late text { fill: var(--faint); font-size: 11px; text-anchor: middle; }
+.graph .held rect { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1; }
+.graph .held-labels text { fill: var(--dim); font-size: 11px; text-anchor: middle; }
+.graph .held-labels .answer { fill: var(--accent); font-weight: 600; }
+.graph text { font-family: var(--ui); }
+
+.graph-figure figcaption {
+    max-width: 76ch;
+    margin-top: var(--s4);
+    color: var(--dim);
+    font-size: var(--t-body);
+    line-height: 1.7;
+}
+
+/* ---------------------------------------------------------- the wire */
+
+.wire {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: var(--s5);
+    margin-top: var(--s6);
+    padding: var(--s5);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    background: var(--surface);
+}
+.wire-side { min-width: 0; }
+.wire-side .section-label { margin-bottom: var(--s3); }
+.xml {
+    margin: 0;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+    color: var(--dim);
+    font-size: var(--t-body);
+    line-height: 1.75;
+}
+.xml .t { color: var(--accent); }
+.xml .a { color: var(--text); }
+.xml .s { color: var(--faint); }
+.wire-arrow { color: var(--faint); }
+.wire-arrow .ico { width: 24px; height: 24px; }
+.wire-row {
+    display: flex;
+    align-items: center;
+    gap: var(--s2);
+    height: 52px;
+    padding: 0 var(--s2);
+    border-radius: var(--r-sm);
+    background: var(--raised);
+}
+.wire-note { margin-top: var(--s3); color: var(--faint); font-size: var(--t-body); line-height: 1.7; }
+
+/* ----------------------------------------------------------- the lab */
+
+.lab { margin-top: var(--s6); }
+
+.lab-sleeves {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: var(--s3);
+}
+.swatch {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s2);
+    padding: var(--s2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    background: transparent;
+    color: var(--dim);
+    font: inherit;
+    font-size: var(--t-small);
+    text-align: center;
+    cursor: pointer;
+    transition: border-color var(--quick) ease-out, color var(--quick) ease-out,
+                background var(--quick) ease-out;
+}
+.swatch:hover { background: var(--hover); color: var(--text); }
+.swatch.is-on { border-color: var(--accent); background: var(--accent-soft); color: var(--text); }
+/* The canvas is painted from the sleeve file by main.js. The same file is
+   also its CSS background, so the swatches are the right pictures before that
+   runs and if it never does. */
+.swatch canvas {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    border-radius: var(--r-art);
+    background-color: var(--raised);
+    background-size: cover;
+    background-position: center;
+}
+.swatch[data-sleeve="0"] canvas { background-image: url("images/sleeve-0.svg"); }
+.swatch[data-sleeve="1"] canvas { background-image: url("images/sleeve-1.svg"); }
+.swatch[data-sleeve="2"] canvas { background-image: url("images/sleeve-2.svg"); }
+.swatch[data-sleeve="3"] canvas { background-image: url("images/sleeve-3.svg"); }
+.swatch[data-sleeve="4"] canvas { background-image: url("images/sleeve-4.svg"); }
+.swatch[data-sleeve="5"] canvas { background-image: url("images/sleeve-5.svg"); }
+
+.lab-panes {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: var(--s5);
+    margin-top: var(--s5);
+}
+.lab-steps, .lab-out {
+    padding: var(--s5);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    background: var(--surface);
+}
+
+.rules { margin-top: var(--s4); }
+.rules li {
+    display: grid;
+    grid-template-columns: 120px 1fr auto;
+    align-items: baseline;
+    gap: var(--s3);
+    padding: var(--s2) 0;
+    border-top: 1px solid var(--border);
+}
+.rules li:first-child { border-top: 0; }
+.rule-test code { color: var(--faint); font-size: var(--t-body); }
+.rule-what { color: var(--dim); font-size: var(--t-body); line-height: 1.55; }
+.rules b {
+    font-family: var(--mono);
+    font-size: var(--t-body);
+    font-weight: var(--w-medium);
+    color: var(--faint);
+    font-variant-numeric: tabular-nums;
+}
+.rules .rule-keep { border-top-color: var(--border-strong); }
+.rule-keep .rule-test code,
+.rule-keep b { color: var(--accent); }
+
+.lab-note { margin-top: var(--s4); color: var(--faint); font-size: var(--t-body); line-height: 1.7; }
+
+.lab-card {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--s4);
+    margin-top: var(--s4);
+    padding: var(--s4);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    background: var(--bg);
+    overflow: hidden;
+}
+.lab-card-wash {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 30% 50%,
+        color-mix(in srgb, var(--tint, transparent) 30%, transparent) 0%,
+        color-mix(in srgb, var(--tint, transparent) 9%, transparent) 40%,
+        transparent 68%);
+    opacity: 0;
+    transition: opacity var(--ambient) ease-out, background var(--ambient) ease-out;
+}
+.lab-card.has-tint .lab-card-wash { opacity: 1; }
+.lab-cover {
+    position: relative;
+    width: 76px; height: 76px;
+    flex: none;
+    border-radius: var(--r-art);
+    background-image: url("images/sleeve-0.svg");
+    background-size: cover;
+    box-shadow: 0 8px 20px #00000073;
+}
+.lab-id { position: relative; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.lab-title { font-size: var(--t-title); font-weight: var(--w-medium); }
+.lab-artist { color: var(--dim); font-size: var(--t-small); }
+
+.lab-figures { margin-top: var(--s4); }
+.field-row {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--s3);
+    padding: var(--s2) 0;
+    border-top: 1px solid var(--border);
+}
+.field-row dt { color: var(--faint); font-size: var(--t-body); }
+.field-row dd { color: var(--text); font-size: var(--t-body); text-align: right; }
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+/* --------------------------------------------------------- the table */
+
+.tbl-wrap {
+    margin-top: var(--s6);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+}
+.tbl { width: 100%; min-width: 520px; border-collapse: collapse; text-align: left; }
+.tbl th, .tbl td { padding: var(--s4) var(--s3); border-top: 1px solid var(--border); vertical-align: top; }
+.tbl thead th {
+    border-top: 0;
+    padding-top: 0;
+    color: var(--faint);
+    font-size: var(--t-micro);
+    font-weight: var(--w-bold);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+.tbl tbody th {
+    width: 34%;
+    color: var(--text);
+    font-size: var(--t-prose);
+    font-weight: var(--w-medium);
+}
+.tbl td { color: var(--dim); font-size: var(--t-body); line-height: 1.7; }
+
+.downloads { display: flex; justify-content: center; gap: var(--s3); margin-top: var(--s5); }
+.platforms { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s5); text-align: left; }
+
+/* ------------------------------------------------------- the colophon */
+
+.colophon { padding: 64px 0; border-top: 1px solid var(--border); }
+.colophon-inner { display: flex; flex-direction: column; gap: var(--s4); }
+.colophon-brand { display: flex; align-items: center; flex-wrap: wrap; gap: var(--s3); }
+.colophon-brand .ico { color: var(--accent); }
+.colophon .wordmark { font-size: 24px; }
+.colophon-brand p { width: 100%; color: var(--dim); font-size: var(--t-body); }
+.colophon-links { display: flex; flex-wrap: wrap; gap: var(--s5); font-size: var(--t-body); }
+.colophon-links a { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
+.colophon-links a:hover { text-decoration: underline; }
+.colophon-links .ico { width: 13px; height: 13px; }
+.colophon-legal { max-width: 78ch; color: var(--faint); font-size: var(--t-body); line-height: 1.7; }
+
+/* -------------------------------------------------------------- narrow
+ *
+ * The window is a fixed-geometry thing — it is a desktop app, and
+ * app-window.slint sets no min-width at all while recording that the transport
+ * row's own minimum measures 948px. Rather than invent a phone layout it never
+ * has, the panes are dropped in the order they stop being legible: the album
+ * header first, then the rail, then the centre — which leaves the queue and
+ * the transport, the two things you would actually reach for on a phone.
+ */
+
+@media (max-width: 1080px) {
+    .screen-head { display: none; }
+    .win-body { height: 560px; }
+}
+
+@media (max-width: 1000px) {
+    /* Six items do not fit beside the wordmark and the three controls. The
+       sections are still reachable by scrolling. */
+    .head-nav { display: none; }
+}
+
+@media (max-width: 980px) {
+    .rail { display: none; }
+    .np { width: auto; flex: 1; }
+}
+
+@media (max-width: 900px) {
+    .hero { padding: 56px 0 48px; }
+    .band { padding: 64px 0; }
+    .window-section { padding-bottom: 64px; }
+    .two-up { grid-template-columns: 1fr; gap: var(--s4); }
+    .two-up-uneven { gap: var(--s6); }
+    .wire { grid-template-columns: 1fr; }
+    .wire-arrow { transform: rotate(90deg); justify-self: center; }
+    .lab-panes { grid-template-columns: 1fr; }
+    .rules li { grid-template-columns: 96px 1fr auto; }
+}
+
+@media (max-width: 860px) {
+    .content { display: none; }
+    .queue { width: auto; flex: 1; border-left: 0; }
+    .right { width: auto; }
+    .level { display: none; }
+}
+
+@media (max-width: 760px) {
+    .wrap, .wrap-wide, .head-inner { padding: 0 var(--s4); }
+    .lab-sleeves { grid-template-columns: repeat(3, 1fr); }
+    .platforms { grid-template-columns: 1fr; }
+    .hero-actions { gap: var(--s2); }
+    .hero-actions .btn-lg { width: 100%; }
+    .downloads { flex-direction: column; }
+    .transport-row { gap: var(--s2); }
+}
+
+@media (max-width: 560px) {
+    .win-body { height: 420px; }
+    .track .badge { display: none; }
+    .chip span { display: none; }
+    .players { right: var(--s3); left: var(--s3); width: auto; }
+    .lab-steps, .lab-out, .card, .packet, .wire { padding: var(--s4); }
+}
+
+@media (max-width: 420px) {
+    .track { padding: 0 var(--s1); gap: 6px; }
+    .track-menu { display: none; }
+    .lab-sleeves { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Where there is no pointer there is no hover, so the copy button has to be
+   visible without one. */
+@media (hover: none) {
+    .cmd .copy { opacity: 1; }
+    .scrub-handle { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* --------------------------------------------------------------- print */
+
+@media print {
+    /* Printing is monochrome and paginated: force the light palette, drop the
+       chrome that only makes sense on screen, and let the window go. */
+    :root, :root.light {
+        --bg: #ffffff;
+        /* Redefined with the rest, or the light theme's white ink survives
+           into print and the primary buttons print white on white. */
+        --accent-ink: #ffffff;
+        --surface: #ffffff;
+        --raised: #ffffff;
+        --sunken: #ffffff;
+        --glass: #ffffff;
+        --glass-raised: #ffffff;
+        --text: #000000;
+        --dim: #333333;
+        --faint: #555555;
+        --border: #cccccc;
+        --border-strong: #999999;
+        --accent: #00548a;
+        --accent-soft: transparent;
+    }
+    .site-head, .skip, .window-section, .lab-sleeves, .cmd .copy,
+    .colophon-links { display: none; }
+    .band { padding: 24px 0; break-inside: avoid; }
+    .card, .packet, .wire, .lab-steps, .lab-out { break-inside: avoid; }
+    a { color: inherit; text-decoration: underline; }
+}

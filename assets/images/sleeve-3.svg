@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  An invented sleeve — "Cadence".
+
+  The page needs cover art it is free to publish, and the application's own
+  metainfo file makes the same point about screenshots: a controller
+  necessarily shows somebody's library, so what it shows here has to be made
+  rather than grabbed.
+
+  Each of these carries some near-black, some blown white and some flat grey on
+  purpose, because a sleeve that is nothing but saturated colour would let the
+  demo below discard nothing and teach nothing. Those are the three things
+  `dominant()` throws away.
+
+  One file serves two purposes. The window above draws it as a CSS background;
+  the colour demo loads this same file into a canvas and runs artwork.rs's
+  arithmetic over its pixels — so the swatch being measured is the sleeve being
+  shown, rather than a second drawing of it.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+  <rect width="200" height="200" fill="#0b0b0d"/>
+  <g fill="#e0559a">
+    <path d="M-14 186 78 6h40L26 186Z"/><path d="M78 186 170 6h40L118 186Z"/>
+  </g>
+  <path d="M-14 186 30 6h20L6 186Z" fill="#95205a"/>
+  <circle cx="100" cy="96" r="30" fill="#fcfcfa"/>
+  <circle cx="100" cy="96" r="10" fill="#0b0b0d"/>
+  <rect x="0" y="186" width="200" height="14" fill="#9a9d9f"/>
+</svg>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  An invented sleeve — "Paper Boats".
+
+  The page needs cover art it is free to publish, and the application's own
+  metainfo file makes the same point about screenshots: a controller
+  necessarily shows somebody's library, so what it shows here has to be made
+  rather than grabbed.
+
+  Each of these carries some near-black, some blown white and some flat grey on
+  purpose, because a sleeve that is nothing but saturated colour would let the
+  demo below discard nothing and teach nothing. Those are the three things
+  `dominant()` throws away.
+
+  One file serves two purposes. The window above draws it as a CSS background;
+  the colour demo loads this same file into a canvas and runs artwork.rs's
+  arithmetic over its pixels — so the swatch being measured is the sleeve being
+  shown, rather than a second drawing of it.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+  <rect width="200" height="200" fill="#cfe8d2"/>
+  <path d="M100 30 160 124H40Z" fill="#17724a"/>
+  <path d="M52 106 96 176H8Z" fill="#43b57e"/>
+  <path d="M150 112 194 182h-88Z" fill="#43b57e"/>
+  <rect x="0" y="182" width="200" height="18" fill="#0b0b0d"/>
+  <rect x="0" y="174" width="200" height="8" fill="#9a9d9f"/>
+  <rect x="150" y="14" width="36" height="36" fill="#fcfcfa"/>
+</svg>

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Source for og.png. Rendered with:
+
+    XDG_DATA_HOME=<dir holding the app's fonts/*.ttf> \
+      rsvg-convert -w 1200 -h 630 og.svg -o og.png
+
+  Colours are the dark-theme tokens from the app's theme.slint, so the card,
+  the site and the application all read as one product. The sleeve is
+  sleeve-0.svg redrawn flat — rsvg will not follow an <image> href to another
+  file reliably, and one gradient is cheaper than an embedded copy. The tint
+  behind it is #be682a, which is what dominant() returns for that sleeve.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="backdrop" x1="0" y1="0" x2="0.55" y2="1">
+      <stop offset="0" stop-color="#16202e"/><stop offset="0.68" stop-color="#06080b"/>
+    </linearGradient>
+    <radialGradient id="wash" cx="0.72" cy="0.42" r="0.55">
+      <stop offset="0" stop-color="#be682a" stop-opacity="0.30"/>
+      <stop offset="0.38" stop-color="#be682a" stop-opacity="0.10"/>
+      <stop offset="1" stop-color="#be682a" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="sleeve" x1="0" y1="0" x2="0.35" y2="1">
+      <stop offset="0" stop-color="#efa94f"/><stop offset="1" stop-color="#93370f"/>
+    </linearGradient>
+    <clipPath id="art"><rect x="856" y="150" width="232" height="232" rx="16"/></clipPath>
+  </defs>
+
+  <rect width="1200" height="630" fill="#0b0d10"/>
+  <rect width="1200" height="630" fill="url(#backdrop)"/>
+  <rect width="1200" height="630" fill="url(#wash)"/>
+
+  <!-- ──────────────────────────────────────────────────────────── lockup -->
+  <g transform="translate(80 74) scale(1.6667)" fill="none" stroke="#38bdf8"
+     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M2 10v3"/><path d="M6 6v11"/><path d="M10 3v18"/>
+    <path d="M14 8v7"/><path d="M18 5v13"/><path d="M22 10v3"/>
+  </g>
+  <text x="136" y="110" font-family="Geo" font-size="46" fill="#eef1f5"
+        letter-spacing="5">AZZURRO</text>
+
+  <!-- ────────────────────────────────────────────────────────── headline -->
+  <g font-family="Geist, sans-serif" font-weight="700" font-size="60"
+     fill="#eef1f5" letter-spacing="-2">
+    <text x="80" y="252">Your players,</text>
+    <text x="80" y="322">in a window.</text>
+  </g>
+
+  <g font-family="Geist, sans-serif" font-size="23" fill="#9aa4b2">
+    <text x="80" y="382">A controller for BluOS players —</text>
+    <text x="80" y="414">Bluesound, NAD and PSB.</text>
+  </g>
+
+  <text x="80" y="480" font-family="Geist, sans-serif" font-size="18"
+        fill="#8992a2">no webview · no Electron · no Qt · no C++</text>
+
+  <text x="80" y="548" font-family="Geist, sans-serif" font-size="22"
+        fill="#38bdf8">azzurro.blue</text>
+
+  <!-- ───────────────────────────────────────────── the sleeve and a rail -->
+  <g clip-path="url(#art)">
+    <rect x="856" y="150" width="232" height="232" fill="url(#sleeve)"/>
+    <rect x="856" y="319" width="232" height="63" fill="#0b0b0d"/>
+    <circle cx="972" cy="236" r="46" fill="#fcfcfa"/>
+    <circle cx="972" cy="236" r="46" fill="none" stroke="#0b0b0d" stroke-width="5"/>
+    <rect x="856" y="319" width="232" height="7" fill="#9a9d9f"/>
+    <rect x="880" y="340" width="112" height="8" fill="#fcfcfa"/>
+    <rect x="880" y="358" width="68" height="8" fill="#fcfcfa"/>
+  </g>
+  <rect x="856.5" y="150.5" width="231" height="231" rx="16" fill="none" stroke="#ffffff33"/>
+
+  <!-- What is playing, set the way the transport bar sets it. -->
+  <text x="856" y="428" font-family="Geist, sans-serif" font-size="21"
+        font-weight="700" fill="#eef1f5">Lantern Season</text>
+  <text x="856" y="456" font-family="Geist, sans-serif" font-size="16"
+        fill="#9aa4b2">Halve Moon</text>
+
+  <!-- The seek rail, filled to where the clock in the page sits. -->
+  <rect x="856" y="482" width="232" height="4" rx="2" fill="#2b313a"/>
+  <rect x="856" y="482" width="82" height="4" rx="2" fill="#38bdf8"/>
+  <text x="856" y="512" font-family="Geist, sans-serif" font-size="14" fill="#8992a2">1:24</text>
+  <text x="1088" y="512" font-family="Geist, sans-serif" font-size="14" fill="#8992a2"
+        text-anchor="end">3:58</text>
+</svg>

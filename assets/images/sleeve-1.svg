@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  An invented sleeve — "Blue Hour".
+
+  The page needs cover art it is free to publish, and the application's own
+  metainfo file makes the same point about screenshots: a controller
+  necessarily shows somebody's library, so what it shows here has to be made
+  rather than grabbed.
+
+  Each of these carries some near-black, some blown white and some flat grey on
+  purpose, because a sleeve that is nothing but saturated colour would let the
+  demo below discard nothing and teach nothing. Those are the three things
+  `dominant()` throws away.
+
+  One file serves two purposes. The window above draws it as a CSS background;
+  the colour demo loads this same file into a canvas and runs artwork.rs's
+  arithmetic over its pixels — so the swatch being measured is the sleeve being
+  shown, rather than a second drawing of it.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0a2a63"/><stop offset="0.7" stop-color="#3d84dd"/>
+      <stop offset="1" stop-color="#8ecdf7"/>
+    </linearGradient>
+  </defs>
+  <rect width="200" height="200" fill="url(#g)"/>
+  <circle cx="148" cy="46" r="19" fill="#fcfcfa"/>
+  <rect x="0" y="132" width="200" height="3" fill="#fcfcfa"/>
+  <rect x="0" y="152" width="200" height="48" fill="#0b0b0d"/>
+  <g fill="#9a9d9f">
+    <rect x="18" y="168" width="88" height="6"/><rect x="18" y="180" width="46" height="6"/>
+  </g>
+</svg>
