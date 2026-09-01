@@ -481,17 +481,6 @@ a.btn, button.btn { cursor: pointer; }
     margin-top: var(--s6);
 }
 
-.hero-status {
-    max-width: 74ch;
-    margin-top: var(--s6);
-    padding-left: var(--s4);
-    border-left: 2px solid var(--border-strong);
-    color: var(--faint);
-    font-size: var(--t-body);
-    line-height: 1.7;
-}
-.hero-status strong { color: var(--dim); font-weight: var(--w-medium); }
-
 /* ------------------------------------------------------- the app window
  *
  * Rebuilt from the app's own geometry in ui/app-window.slint: a 268px rail, a
@@ -1214,18 +1203,6 @@ a.btn, button.btn { cursor: pointer; }
     line-height: 1.7;
 }
 .center .note { margin-left: auto; margin-right: auto; }
-.dim { color: var(--faint); }
-p.dim { font-size: var(--t-body); }
-
-.pullquote {
-    max-width: 72ch;
-    margin-top: var(--s6);
-    padding-left: var(--s5);
-    border-left: 2px solid var(--accent);
-    color: var(--text);
-    font-size: clamp(17px, 2vw, 21px);
-    line-height: 1.5;
-}
 
 .two-up {
     display: grid;
@@ -1233,22 +1210,12 @@ p.dim { font-size: var(--t-body); }
     gap: var(--s5);
     margin-top: var(--s6);
 }
-.two-up-uneven { gap: var(--s7); }
-
-.card {
-    padding: var(--s5);
-    border: 1px solid var(--border);
-    border-radius: var(--r-md);
-    background: var(--surface);
-}
-.card-plain { background: transparent; }
 .card h3,
 .two-up h3 {
     font-size: var(--t-heading);
     font-weight: var(--w-medium);
     letter-spacing: -0.01em;
 }
-.card h3 + p { margin-top: var(--s3); }
 .card p + p,
 .two-up p + p { margin-top: var(--s3); }
 .card p,
@@ -1257,28 +1224,6 @@ p.dim { font-size: var(--t-body); }
 .two-up article > h2 + p { margin-top: var(--s4); }
 
 .divider { height: 1px; background: var(--border); }
-.divider-spaced { margin: var(--s6) 0; }
-
-.path {
-    display: inline-block;
-    margin-top: var(--s3);
-    padding: var(--s1) var(--s2);
-    border: 1px solid var(--border);
-    border-radius: var(--r-art);
-    background: var(--sunken);
-    color: var(--dim);
-    font-size: var(--t-body);
-}
-
-.verbs { display: flex; flex-wrap: wrap; gap: var(--s1); margin-top: var(--s3); }
-.verbs code {
-    padding: 2px var(--s2);
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    background: var(--sunken);
-    color: var(--dim);
-    font-size: var(--t-small);
-}
 
 /* --------------------------------------------------------- cmd blocks */
 
@@ -1323,261 +1268,18 @@ p.dim { font-size: var(--t-body); }
 .cmd .copy:focus-visible { opacity: 1; }
 .cmd .copy:hover { color: var(--text); background: var(--hover); }
 .cmd.is-copied .copy { opacity: 1; color: var(--accent); }
-
-/* -------------------------------------------------------- the packet */
-
-.packet {
-    margin-top: var(--s5);
-    padding: var(--s5);
-    border: 1px solid var(--border);
-    border-radius: var(--r-md);
-    background: var(--surface);
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
-}
-.packet pre { margin: 0; }
-.packet code { font-size: var(--t-title); line-height: 2; letter-spacing: 0.04em; }
-.pk-a { color: var(--accent); }
-.pk-b { color: var(--text); }
-.pk-c { color: var(--dim); }
-.pk-d { color: var(--faint); }
-.pk-x { color: var(--faint); font-size: var(--t-body); letter-spacing: 0; }
-.packet figcaption {
-    max-width: 72ch;
-    margin-top: var(--s4);
-    color: var(--dim);
-    font-size: var(--t-body);
-    line-height: 1.7;
-}
-
-/* --------------------------------------------------------- the graph */
-
-.graph-figure {
-    margin-top: var(--s6);
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
-}
-.graph { width: 100%; min-width: 620px; height: auto; overflow: visible; }
-.graph .ax line { stroke: var(--border-strong); stroke-width: 1; }
-.graph .ax-label { fill: var(--dim); font-size: 13px; font-weight: 600; }
-.graph .ev line { stroke: var(--border-strong); stroke-width: 1; stroke-dasharray: 3 4; }
-.graph .ev text { fill: var(--faint); font-size: 11px; text-anchor: middle; }
-.graph .poll-ticks circle { fill: var(--faint); }
-.graph .late path { stroke: var(--faint); stroke-width: 3; stroke-linecap: round; }
-.graph .late text { fill: var(--faint); font-size: 11px; text-anchor: middle; }
-.graph .held rect { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1; }
-.graph .held-labels text { fill: var(--dim); font-size: 11px; text-anchor: middle; }
-.graph .held-labels .answer { fill: var(--accent); font-weight: 600; }
-.graph text { font-family: var(--ui); }
-
-.graph-figure figcaption {
-    max-width: 76ch;
-    margin-top: var(--s4);
-    color: var(--dim);
-    font-size: var(--t-body);
-    line-height: 1.7;
-}
-
-/* ---------------------------------------------------------- the wire */
-
-.wire {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items: center;
-    gap: var(--s5);
-    margin-top: var(--s6);
-    padding: var(--s5);
-    border: 1px solid var(--border);
-    border-radius: var(--r-md);
-    background: var(--surface);
-}
-.wire-side { min-width: 0; }
 .wire-side .section-label { margin-bottom: var(--s3); }
-.xml {
-    margin: 0;
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
-    scrollbar-width: thin;
-    color: var(--dim);
-    font-size: var(--t-body);
-    line-height: 1.75;
-}
-.xml .t { color: var(--accent); }
-.xml .a { color: var(--text); }
 .xml .s { color: var(--faint); }
-.wire-arrow { color: var(--faint); }
 .wire-arrow .ico { width: 24px; height: 24px; }
-.wire-row {
-    display: flex;
-    align-items: center;
-    gap: var(--s2);
-    height: 52px;
-    padding: 0 var(--s2);
-    border-radius: var(--r-sm);
-    background: var(--raised);
-}
-.wire-note { margin-top: var(--s3); color: var(--faint); font-size: var(--t-body); line-height: 1.7; }
-
-/* ----------------------------------------------------------- the lab */
-
-.lab { margin-top: var(--s6); }
-
-.lab-sleeves {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: var(--s3);
-}
-.swatch {
-    display: flex;
-    flex-direction: column;
-    gap: var(--s2);
-    padding: var(--s2);
-    border: 1px solid var(--border);
-    border-radius: var(--r-sm);
-    background: transparent;
-    color: var(--dim);
-    font: inherit;
-    font-size: var(--t-small);
-    text-align: center;
-    cursor: pointer;
-    transition: border-color var(--quick) ease-out, color var(--quick) ease-out,
-                background var(--quick) ease-out;
-}
-.swatch:hover { background: var(--hover); color: var(--text); }
-.swatch.is-on { border-color: var(--accent); background: var(--accent-soft); color: var(--text); }
-/* The canvas is painted from the sleeve file by main.js. The same file is
-   also its CSS background, so the swatches are the right pictures before that
-   runs and if it never does. */
-.swatch canvas {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 1;
-    border-radius: var(--r-art);
-    background-color: var(--raised);
-    background-size: cover;
-    background-position: center;
-}
 .swatch[data-sleeve="0"] canvas { background-image: url("images/sleeve-0.svg"); }
 .swatch[data-sleeve="1"] canvas { background-image: url("images/sleeve-1.svg"); }
 .swatch[data-sleeve="2"] canvas { background-image: url("images/sleeve-2.svg"); }
 .swatch[data-sleeve="3"] canvas { background-image: url("images/sleeve-3.svg"); }
 .swatch[data-sleeve="4"] canvas { background-image: url("images/sleeve-4.svg"); }
 .swatch[data-sleeve="5"] canvas { background-image: url("images/sleeve-5.svg"); }
-
-.lab-panes {
-    display: grid;
-    grid-template-columns: 1.15fr 1fr;
-    gap: var(--s5);
-    margin-top: var(--s5);
-}
-.lab-steps, .lab-out {
-    padding: var(--s5);
-    border: 1px solid var(--border);
-    border-radius: var(--r-md);
-    background: var(--surface);
-}
-
-.rules { margin-top: var(--s4); }
-.rules li {
-    display: grid;
-    grid-template-columns: 120px 1fr auto;
-    align-items: baseline;
-    gap: var(--s3);
-    padding: var(--s2) 0;
-    border-top: 1px solid var(--border);
-}
-.rules li:first-child { border-top: 0; }
-.rule-test code { color: var(--faint); font-size: var(--t-body); }
-.rule-what { color: var(--dim); font-size: var(--t-body); line-height: 1.55; }
-.rules b {
-    font-family: var(--mono);
-    font-size: var(--t-body);
-    font-weight: var(--w-medium);
-    color: var(--faint);
-    font-variant-numeric: tabular-nums;
-}
-.rules .rule-keep { border-top-color: var(--border-strong); }
-.rule-keep .rule-test code,
-.rule-keep b { color: var(--accent); }
-
-.lab-note { margin-top: var(--s4); color: var(--faint); font-size: var(--t-body); line-height: 1.7; }
-
-.lab-card {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: var(--s4);
-    margin-top: var(--s4);
-    padding: var(--s4);
-    border: 1px solid var(--border);
-    border-radius: var(--r-md);
-    background: var(--bg);
-    overflow: hidden;
-}
-.lab-card-wash {
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at 30% 50%,
-        color-mix(in srgb, var(--tint, transparent) 30%, transparent) 0%,
-        color-mix(in srgb, var(--tint, transparent) 9%, transparent) 40%,
-        transparent 68%);
-    opacity: 0;
-    transition: opacity var(--ambient) ease-out, background var(--ambient) ease-out;
-}
 .lab-card.has-tint .lab-card-wash { opacity: 1; }
-.lab-cover {
-    position: relative;
-    width: 76px; height: 76px;
-    flex: none;
-    border-radius: var(--r-art);
-    background-image: url("images/sleeve-0.svg");
-    background-size: cover;
-    box-shadow: 0 8px 20px #00000073;
-}
-.lab-id { position: relative; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.lab-title { font-size: var(--t-title); font-weight: var(--w-medium); }
-.lab-artist { color: var(--dim); font-size: var(--t-small); }
-
-.lab-figures { margin-top: var(--s4); }
-.field-row {
-    display: flex;
-    justify-content: space-between;
-    gap: var(--s3);
-    padding: var(--s2) 0;
-    border-top: 1px solid var(--border);
-}
-.field-row dt { color: var(--faint); font-size: var(--t-body); }
-.field-row dd { color: var(--text); font-size: var(--t-body); text-align: right; }
-.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
-
-/* --------------------------------------------------------- the table */
-
-.tbl-wrap {
-    margin-top: var(--s6);
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
-}
-.tbl { width: 100%; min-width: 520px; border-collapse: collapse; text-align: left; }
-.tbl th, .tbl td { padding: var(--s4) var(--s3); border-top: 1px solid var(--border); vertical-align: top; }
-.tbl thead th {
-    border-top: 0;
-    padding-top: 0;
-    color: var(--faint);
-    font-size: var(--t-micro);
-    font-weight: var(--w-bold);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-}
-.tbl tbody th {
-    width: 34%;
-    color: var(--text);
-    font-size: var(--t-prose);
-    font-weight: var(--w-medium);
-}
-.tbl td { color: var(--dim); font-size: var(--t-body); line-height: 1.7; }
 
 .downloads { display: flex; justify-content: center; gap: var(--s3); margin-top: var(--s5); }
-.platforms { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s5); text-align: left; }
 
 /* ------------------------------------------------------- the colophon */
 
@@ -1623,11 +1325,6 @@ p.dim { font-size: var(--t-body); }
     .band { padding: 64px 0; }
     .window-section { padding-bottom: 64px; }
     .two-up { grid-template-columns: 1fr; gap: var(--s4); }
-    .two-up-uneven { gap: var(--s6); }
-    .wire { grid-template-columns: 1fr; }
-    .wire-arrow { transform: rotate(90deg); justify-self: center; }
-    .lab-panes { grid-template-columns: 1fr; }
-    .rules li { grid-template-columns: 96px 1fr auto; }
 }
 
 @media (max-width: 860px) {
@@ -1639,8 +1336,6 @@ p.dim { font-size: var(--t-body); }
 
 @media (max-width: 760px) {
     .wrap, .wrap-wide, .head-inner { padding: 0 var(--s4); }
-    .lab-sleeves { grid-template-columns: repeat(3, 1fr); }
-    .platforms { grid-template-columns: 1fr; }
     .hero-actions { gap: var(--s2); }
     .hero-actions .btn-lg { width: 100%; }
     .downloads { flex-direction: column; }
@@ -1652,13 +1347,11 @@ p.dim { font-size: var(--t-body); }
     .track .badge { display: none; }
     .chip span { display: none; }
     .players { right: var(--s3); left: var(--s3); width: auto; }
-    .lab-steps, .lab-out, .card, .packet, .wire { padding: var(--s4); }
 }
 
 @media (max-width: 420px) {
     .track { padding: 0 var(--s1); gap: 6px; }
     .track-menu { display: none; }
-    .lab-sleeves { grid-template-columns: repeat(2, 1fr); }
 }
 
 /* Where there is no pointer there is no hover, so the copy button has to be
@@ -1703,6 +1396,5 @@ p.dim { font-size: var(--t-body); }
     .site-head, .skip, .window-section, .lab-sleeves, .cmd .copy,
     .colophon-links { display: none; }
     .band { padding: 24px 0; break-inside: avoid; }
-    .card, .packet, .wire, .lab-steps, .lab-out { break-inside: avoid; }
     a { color: inherit; text-decoration: underline; }
 }
