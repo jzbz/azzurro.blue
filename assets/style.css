@@ -595,13 +595,18 @@ a.btn, button.btn { cursor: pointer; }
     letter-spacing: 0.08em;
     text-transform: uppercase;
 }
-/* Words that came off the wire are not uppercased — the player wrote them. */
-.rail-label:not(:first-of-type) {
+/* The sidebar's group headings, drawn as the app draws them: title case, not
+   uppercased, and alike.
+   This was `:not(:first-of-type)` back when the first heading was the app's own
+   LIBRARY and the ones under it were words that came off the wire. Both groups
+   here are the app's own, so the exception left INPUTS shouting above a quiet
+   Music Services. */
+.rail-label {
+    padding: var(--s2) var(--s2) 0 var(--s4);
     font-weight: var(--w-medium);
     letter-spacing: 0;
     text-transform: none;
 }
-.rail-label { padding: var(--s2) var(--s2) 0 var(--s4); }
 
 .rail-item {
     position: relative;
