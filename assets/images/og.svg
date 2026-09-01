@@ -43,8 +43,8 @@
   <!-- ────────────────────────────────────────────────────────── headline -->
   <g font-family="Geist, sans-serif" font-weight="700" font-size="60"
      fill="#eef1f5" letter-spacing="-2">
-    <text x="80" y="252">Your players,</text>
-    <text x="80" y="322">in a window.</text>
+    <text x="80" y="252">Your music,</text>
+    <text x="80" y="322">your way…</text>
   </g>
 
   <g font-family="Geist, sans-serif" font-size="23" fill="#9aa4b2">
@@ -53,7 +53,7 @@
   </g>
 
   <text x="80" y="480" font-family="Geist, sans-serif" font-size="18"
-        fill="#8992a2">no webview · no Electron · no Qt · no C++</text>
+        fill="#8992a2">no webview · no Electron · no account · no telemetry</text>
 
   <text x="80" y="548" font-family="Geist, sans-serif" font-size="22"
         fill="#38bdf8">azzurro.blue</text>
